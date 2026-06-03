@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
 import { IconSparkles, IconBell } from '@tabler/icons-react';
-import { useUserStore } from '@/stores/useUserStore';
+import { useUserStore, selectLevel } from '@/stores/useUserStore';
 import { Badge, CommandPalette } from '@/components/ui';
 import { cn } from '@/lib/cn';
 
@@ -14,6 +14,7 @@ const mainNavLinks = [
   { label: 'Learn', href: '/learn' },
   { label: 'Community', href: '/community' },
   { label: 'Events', href: '/events' },
+  { label: 'Leaderboard', href: '/leaderboard' },
 ];
 
 const mockNotifications = [
@@ -25,7 +26,7 @@ const mockNotifications = [
 function AvatarDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const { level } = useUserStore();
+  const level = useUserStore(selectLevel);
 
   const handleMouseEnter = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);

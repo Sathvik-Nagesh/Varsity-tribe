@@ -5,7 +5,7 @@ import { PageLayout } from '@/components/layout/PageLayout';
 import { Container } from '@/components/layout/Container';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import confetti from 'canvas-confetti';
+
 import { motion, AnimatePresence } from 'framer-motion';
 import { IconRobot, IconTrophy, IconArrowLeft } from '@tabler/icons-react';
 import { useUserStore } from '@/stores/useUserStore';
@@ -109,7 +109,8 @@ export default function SalaryNegotiationPage() {
   
   const endRef = useRef<HTMLDivElement>(null);
 
-  const triggerConfetti = () => {
+  const triggerConfetti = async () => {
+    const confetti = (await import('canvas-confetti')).default;
     const duration = 3 * 1000;
     const end = Date.now() + duration;
 

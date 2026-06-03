@@ -8,16 +8,16 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { IconArrowLeft, IconTarget, IconCheck, IconAlertTriangle, IconDownload, IconBulb, IconTrendingUp } from '@tabler/icons-react';
 import Link from 'next/link';
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  ReferenceLine
-} from 'recharts';
+import dynamic from 'next/dynamic';
+
+const AreaChart = dynamic(() => import('recharts').then((mod) => mod.AreaChart), { ssr: false });
+const Area = dynamic(() => import('recharts').then((mod) => mod.Area), { ssr: false });
+const XAxis = dynamic(() => import('recharts').then((mod) => mod.XAxis), { ssr: false });
+const YAxis = dynamic(() => import('recharts').then((mod) => mod.YAxis), { ssr: false });
+const CartesianGrid = dynamic(() => import('recharts').then((mod) => mod.CartesianGrid), { ssr: false });
+const Tooltip = dynamic(() => import('recharts').then((mod) => mod.Tooltip), { ssr: false });
+const ResponsiveContainer = dynamic(() => import('recharts').then((mod) => mod.ResponsiveContainer), { ssr: false });
+const ReferenceLine = dynamic(() => import('recharts').then((mod) => mod.ReferenceLine), { ssr: false });
 import { PageLayout } from "@/components/layout/PageLayout";
 import { useUserStore } from '@/stores/useUserStore';
 import { formatCurrency } from '@/lib/formatCurrency';

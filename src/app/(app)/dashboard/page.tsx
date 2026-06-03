@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useSyncExternalStore } from 'react';
+import React, { useState, useEffect, useSyncExternalStore } from 'react';
 import Link from 'next/link';
+import { mockDB } from '@/services/mockDB';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -24,8 +25,8 @@ import {
   IconArrowUp,
   IconTrophy,
 } from '@tabler/icons-react';
-import { useUserStore } from '@/stores/useUserStore';
-import { useGoalStore } from '@/stores/useGoalStore';
+import { useUserStore, selectPersonaTrack, selectLevel, selectRecommendedActions } from '@/stores/useUserStore';
+import { useGoalStore, selectConflicts } from '@/stores/useGoalStore';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { ProgressBar } from '@/components/ui/ProgressBar';
@@ -91,43 +92,7 @@ const trackDescriptions: Record<PersonaTrack, { title: string; description: stri
   },
 };
 
-/* ─── Quick Tools Data ──────────────────────────────────────────────── */
-
-const quickTools = [
-  { icon: IconCalculator, title: 'SIP Calculator', description: 'Project your SIP returns', color: 'bg-brand-primary/10 text-brand-primary', href: '/tools/sip' },
-  { icon: IconTarget, title: 'Goal Planner', description: 'Plan your financial goals', color: 'bg-brand-success/10 text-brand-success', href: '/tools' },
-  { icon: IconReceipt, title: 'EMI Calculator', description: 'Calculate your EMIs', color: 'bg-brand-warning/10 text-brand-warning', href: '/tools/emi' },
-  { icon: IconChartPie, title: 'Portfolio Check', description: 'Analyse your portfolio', color: 'bg-brand-danger/10 text-brand-danger', href: '/tools/portfolio' },
-];
-
-/* ─── Upcoming Events Mock Data ─────────────────────────────────────── */
-const upcomingEvents = [
-  { id: 1, title: 'Mastering Tax Savings in 2026', date: 'Today, 6:00 PM', attendees: 120 },
-  { id: 2, title: 'Live Q&A: First-time Home Buyers', date: 'Tomorrow, 4:00 PM', attendees: 85 },
-];
-
-/* ─── Live Activity Mock Data ───────────────────────────────────────── */
-const liveActivities = [
-  { id: 1, user: 'Priya', action: 'completed Emergency Fund', time: '2m ago' },
-  { id: 2, user: 'Rahul', action: 'started SIP in Index Funds', time: '5m ago' },
-  { id: 3, user: 'Anjali', action: 'earned "Debt Free" badge', time: '12m ago' },
-];
-
-/* ─── Community Mock Data ───────────────────────────────────────────── */
-
-const communityPosts = [
-  { initials: 'RK', username: 'Rohan K.', content: 'Just started my first SIP today! Feels great to finally take the plunge into investing. 🚀', upvotes: 23, tag: 'FirstSIP' },
-  { initials: 'PM', username: 'Priya M.', content: 'Hit my emergency fund target! 6 months of expenses saved. Such a relief knowing it\'s there.', upvotes: 45, tag: 'EmergencyFund' },
-  { initials: 'AS', username: 'Amit S.', content: 'Negotiated a 30% raise using the salary module tips. This community is gold! 💰', upvotes: 67, tag: 'SalaryNegotiation' },
-];
-
-/* ─── Leaderboard Mock Data ─────────────────────────────────────────── */
-
-const topLeaders = [
-  { id: 'u1', name: 'Priya Sharma', xp: 12500, avatar: '👩🏽', title: 'Tribe Leader' },
-  { id: 'u2', name: 'Rahul Desai', xp: 11200, avatar: '👨🏻', title: 'Strategist' },
-  { id: 'u3', name: 'Neha Gupta', xp: 9800, avatar: '👩🏻', title: 'Strategist' },
-];
+// Mock data moved to src/services/mockDB.ts
 
 /* ─── Helpers ───────────────────────────────────────────────────────── */
 
@@ -214,11 +179,160 @@ function Section({ children, delay = 0 }: { children: React.ReactNode; delay?: n
   );
 }
 
+/* ─── Memoized List Components ──────────────────────────────────────── */
+
+const QuickToolsList = React.memo(({ tools }: { tools: any[] }) => (
+  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    {tools.map((tool) => {
+      const ToolIcon = tool.icon;
+      return (
+        <Link key={tool.title} href={tool.href}>
+          <Card hoverable className="p-4 h-full cursor-pointer">
+            <div className="space-y-3">
+              <div
+                className={cn(
+                  'flex h-10 w-10 items-center justify-center rounded-full',
+                  tool.color
+                )}
+              >
+                <ToolIcon size={20} />
+              </div>
+              <h3 className="text-h3">{tool.title}</h3>
+              <p className="text-small text-brand-text-secondary">
+                {tool.description}
+              </p>
+            </div>
+          </Card>
+        </Link>
+      );
+    })}
+  </div>
+));
+QuickToolsList.displayName = 'QuickToolsList';
+
+const UpcomingEventsList = React.memo(({ events }: { events: any[] }) => (
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    {events.map((event) => (
+      <Card key={event.id} hoverable className="p-4">
+        <div className="flex items-start justify-between">
+          <div>
+            <h3 className="text-h3 text-brand-text-primary">{event.title}</h3>
+            <p className="text-small text-brand-primary font-medium mt-1">{event.date}</p>
+            <p className="text-small text-brand-text-secondary mt-1">
+              {event.attendees} attending
+            </p>
+          </div>
+          <Button variant="secondary" size="sm">RSVP</Button>
+        </div>
+      </Card>
+    ))}
+  </div>
+));
+UpcomingEventsList.displayName = 'UpcomingEventsList';
+
+const LiveActivitiesList = React.memo(({ activities }: { activities: any[] }) => (
+  <div className="space-y-3">
+    {activities.map((act) => (
+      <div key={act.id} className="flex items-center justify-between text-small">
+        <div className="flex items-center gap-2 truncate">
+          <div className="w-2 h-2 rounded-full bg-brand-success animate-pulse shrink-0" />
+          <span className="truncate">
+            <strong className="text-brand-text-primary">{act.user}</strong>{' '}
+            <span className="text-brand-text-secondary">{act.action}</span>
+          </span>
+        </div>
+        <span className="text-brand-text-tertiary shrink-0 ml-2">{act.time}</span>
+      </div>
+    ))}
+  </div>
+));
+LiveActivitiesList.displayName = 'LiveActivitiesList';
+
+const CommunityPostsList = React.memo(({ posts }: { posts: any[] }) => (
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    {posts.slice(0, 2).map((post) => (
+      <Card key={post.username} variant="default" className="p-4">
+        <div className="space-y-3">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-primary/10 text-brand-primary text-small font-semibold">
+              {post.initials}
+            </div>
+            <span className="text-body font-medium text-brand-text-primary">
+              {post.username}
+            </span>
+          </div>
+          <p className="text-small text-brand-text-secondary leading-relaxed">
+            {post.content}
+          </p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1 text-small text-brand-text-tertiary">
+              <IconArrowUp size={14} />
+              <span>{post.upvotes}</span>
+            </div>
+            <Badge variant="neutral" size="sm">
+              #{post.tag}
+            </Badge>
+          </div>
+        </div>
+      </Card>
+    ))}
+  </div>
+));
+CommunityPostsList.displayName = 'CommunityPostsList';
+
+const TopLeadersList = React.memo(({ leaders }: { leaders: any[] }) => (
+  <div className="space-y-4">
+    {leaders.map((leader, index) => (
+      <div key={leader.id} className="flex items-center gap-3">
+        <div className="w-6 text-center font-bold text-brand-text-tertiary">
+          #{index + 1}
+        </div>
+        <div className="w-10 h-10 rounded-full bg-brand-surface-elevated flex items-center justify-center text-xl shrink-0">
+          {leader.avatar}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-brand-text-primary truncate">
+            {leader.name}
+          </p>
+          <p className="text-xs text-brand-text-secondary truncate">
+            {leader.title}
+          </p>
+        </div>
+        <div className="text-right shrink-0 font-bold text-brand-primary text-sm">
+          {leader.xp.toLocaleString()} XP
+        </div>
+      </div>
+    ))}
+    <div className="pt-3 border-t border-brand-border">
+      <div className="flex items-center justify-between text-sm">
+        <span className="text-brand-text-secondary">Your Rank</span>
+        <span className="font-bold text-brand-primary">#1024</span>
+      </div>
+    </div>
+  </div>
+));
+TopLeadersList.displayName = 'TopLeadersList';
+
 /* ─── Dashboard Page ────────────────────────────────────────────────── */
 
 export default function DashboardPage() {
   const router = useRouter();
   const [nudgeDismissed, setNudgeDismissed] = useState(false);
+
+  // Local state for mock data
+  const [events, setEvents] = useState<any[]>([]);
+  const [activities, setActivities] = useState<any[]>([]);
+  const [posts, setPosts] = useState<any[]>([]);
+  const [leaders, setLeaders] = useState<any[]>([]);
+  const [tools, setTools] = useState<any[]>([]);
+
+  useEffect(() => {
+    mockDB.getUpcomingEvents().then(setEvents);
+    mockDB.getLiveActivities().then(setActivities);
+    mockDB.getCommunityPosts().then(setPosts);
+    mockDB.getTopLeaders().then(setLeaders);
+    mockDB.getQuickTools().then(setTools);
+  }, []);
 
   const mounted = useSyncExternalStore(
     () => () => {},
@@ -226,17 +340,13 @@ export default function DashboardPage() {
     () => false,
   );
 
-  const {
-    onboardingCompleted,
-    personaTrack,
-    xp,
-    level,
-    streak,
-    recommendedActions,
-    currency,
-  } = useUserStore();
+  const { onboardingCompleted, xp, streak, currency } = useUserStore();
+  const personaTrack = useUserStore(selectPersonaTrack);
+  const level = useUserStore(selectLevel);
+  const recommendedActions = useUserStore(selectRecommendedActions);
 
-  const { goals, conflicts } = useGoalStore();
+  const { goals } = useGoalStore();
+  const conflicts = useGoalStore(selectConflicts(50000)); // Hardcoded budget for now since it was a mock
 
   /* ── Pre-mount: skeleton ── */
   if (!mounted) return <LoadingSkeleton />;
@@ -478,20 +588,7 @@ export default function DashboardPage() {
               <div className="lg:col-span-1 space-y-4">
                 <h2 className="text-h2">Live Activity</h2>
                 <Card variant="default" className="p-4 h-[120px] overflow-y-auto">
-                  <div className="space-y-3">
-                    {liveActivities.map((act) => (
-                      <div key={act.id} className="flex items-center justify-between text-small">
-                        <div className="flex items-center gap-2 truncate">
-                          <div className="w-2 h-2 rounded-full bg-brand-success animate-pulse shrink-0" />
-                          <span className="truncate">
-                            <strong className="text-brand-text-primary">{act.user}</strong>{' '}
-                            <span className="text-brand-text-secondary">{act.action}</span>
-                          </span>
-                        </div>
-                        <span className="text-brand-text-tertiary shrink-0 ml-2">{act.time}</span>
-                      </div>
-                    ))}
-                  </div>
+                  <LiveActivitiesList activities={activities} />
                 </Card>
               </div>
             </div>
@@ -501,31 +598,7 @@ export default function DashboardPage() {
           <Section delay={0.25}>
             <div className="space-y-4">
               <h2 className="text-h2">Quick Tools</h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {quickTools.map((tool) => {
-                  const ToolIcon = tool.icon;
-                  return (
-                    <Link key={tool.title} href={tool.href}>
-                      <Card hoverable className="p-4 h-full cursor-pointer">
-                        <div className="space-y-3">
-                          <div
-                            className={cn(
-                              'flex h-10 w-10 items-center justify-center rounded-full',
-                              tool.color
-                            )}
-                          >
-                            <ToolIcon size={20} />
-                          </div>
-                          <h3 className="text-h3">{tool.title}</h3>
-                          <p className="text-small text-brand-text-secondary">
-                            {tool.description}
-                          </p>
-                        </div>
-                      </Card>
-                    </Link>
-                  );
-                })}
-              </div>
+              <QuickToolsList tools={tools} />
             </div>
           </Section>
 
@@ -540,34 +613,7 @@ export default function DashboardPage() {
                     <Button variant="ghost" size="sm">View All</Button>
                   </Link>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {communityPosts.slice(0, 2).map((post) => (
-                    <Card key={post.username} variant="default" className="p-4">
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-primary/10 text-brand-primary text-small font-semibold">
-                            {post.initials}
-                          </div>
-                          <span className="text-body font-medium text-brand-text-primary">
-                            {post.username}
-                          </span>
-                        </div>
-                        <p className="text-small text-brand-text-secondary leading-relaxed">
-                          {post.content}
-                        </p>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-1 text-small text-brand-text-tertiary">
-                            <IconArrowUp size={14} />
-                            <span>{post.upvotes}</span>
-                          </div>
-                          <Badge variant="neutral" size="sm">
-                            #{post.tag}
-                          </Badge>
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
+                <CommunityPostsList posts={posts} />
               </div>
 
               {/* Leaderboard */}
@@ -579,35 +625,7 @@ export default function DashboardPage() {
                   </Link>
                 </div>
                 <Card variant="default" className="p-4">
-                  <div className="space-y-4">
-                    {topLeaders.map((leader, index) => (
-                      <div key={leader.id} className="flex items-center gap-3">
-                        <div className="w-6 text-center font-bold text-brand-text-tertiary">
-                          #{index + 1}
-                        </div>
-                        <div className="w-10 h-10 rounded-full bg-brand-surface-elevated flex items-center justify-center text-xl shrink-0">
-                          {leader.avatar}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-brand-text-primary truncate">
-                            {leader.name}
-                          </p>
-                          <p className="text-xs text-brand-text-secondary truncate">
-                            {leader.title}
-                          </p>
-                        </div>
-                        <div className="text-right shrink-0 font-bold text-brand-primary text-sm">
-                          {leader.xp.toLocaleString()} XP
-                        </div>
-                      </div>
-                    ))}
-                    <div className="pt-3 border-t border-brand-border">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-brand-text-secondary">Your Rank</span>
-                        <span className="font-bold text-brand-primary">#1024</span>
-                      </div>
-                    </div>
-                  </div>
+                  <TopLeadersList leaders={leaders} />
                 </Card>
               </div>
             </div>
@@ -620,22 +638,7 @@ export default function DashboardPage() {
                 <h2 className="text-h2">Upcoming Events</h2>
                 <Button variant="ghost" size="sm">View All</Button>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {upcomingEvents.map((event) => (
-                  <Card key={event.id} hoverable className="p-4">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h3 className="text-h3 text-brand-text-primary">{event.title}</h3>
-                        <p className="text-small text-brand-primary font-medium mt-1">{event.date}</p>
-                        <p className="text-small text-brand-text-secondary mt-1">
-                          {event.attendees} attending
-                        </p>
-                      </div>
-                      <Button variant="secondary" size="sm">RSVP</Button>
-                    </div>
-                  </Card>
-                ))}
-              </div>
+              <UpcomingEventsList events={events} />
             </div>
           </Section>
         </motion.div>

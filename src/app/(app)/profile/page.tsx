@@ -6,7 +6,7 @@ import {
   IconEdit, IconMedal, IconFlame, IconTarget, IconTrophy, 
   IconUser, IconShieldCheck, IconLock, IconActivity, IconDna
 } from '@tabler/icons-react';
-import { useUserStore } from '@/stores/useUserStore';
+import { useUserStore, selectLevel } from '@/stores/useUserStore';
 import { Card, Badge, Button, ProgressBar } from '@/components/ui';
 import { USER_LEVELS } from '@/types';
 import { cn } from '@/lib/cn';
@@ -40,7 +40,8 @@ const FINANCIAL_DNA = {
 };
 
 export default function ProfilePage() {
-  const { xp, level, streak } = useUserStore();
+  const { xp, streak } = useUserStore();
+  const level = useUserStore(selectLevel);
   const [activeTab, setActiveTab] = useState('Goals');
 
   const currentLevelIndex = USER_LEVELS.findIndex((l) => l.name.toLowerCase() === level.toLowerCase());

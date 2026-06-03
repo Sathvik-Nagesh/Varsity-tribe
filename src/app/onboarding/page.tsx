@@ -19,7 +19,7 @@ import {
 } from '@tabler/icons-react';
 
 import { Button, ProgressBar, Badge, Card, Input } from '@/components/ui';
-import { useUserStore } from '@/stores/useUserStore';
+import { useUserStore, selectRiskProfile, selectPersonaTrack, selectRecommendedActions } from '@/stores/useUserStore';
 import { cn } from '@/lib/cn';
 import { formatCurrency } from '@/lib/formatCurrency';
 
@@ -86,8 +86,10 @@ function StepHeader({
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const { completeOnboarding, riskProfile, personaTrack, recommendedActions, setCurrency, currency: currencyStore } =
-    useUserStore();
+  const { completeOnboarding, setCurrency, currency: currencyStore } = useUserStore();
+  const riskProfile = useUserStore(selectRiskProfile);
+  const personaTrack = useUserStore(selectPersonaTrack);
+  const recommendedActions = useUserStore(selectRecommendedActions);
 
   /* hydration guard */
   const mounted = useSyncExternalStore(

@@ -8,14 +8,14 @@ import { Badge } from '@/components/ui/Badge';
 import { IconArrowLeft, IconAlertCircle } from '@tabler/icons-react';
 import { Container } from '@/components/layout/Container';
 import Link from 'next/link';
-import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  ResponsiveContainer,
-  Legend
-} from 'recharts';
+import dynamic from 'next/dynamic';
+
+const PieChart = dynamic(() => import('recharts').then((mod) => mod.PieChart), { ssr: false });
+const Pie = dynamic(() => import('recharts').then((mod) => mod.Pie), { ssr: false });
+const Cell = dynamic(() => import('recharts').then((mod) => mod.Cell), { ssr: false });
+const Tooltip = dynamic(() => import('recharts').then((mod) => mod.Tooltip), { ssr: false });
+const ResponsiveContainer = dynamic(() => import('recharts').then((mod) => mod.ResponsiveContainer), { ssr: false });
+const Legend = dynamic(() => import('recharts').then((mod) => mod.Legend), { ssr: false });
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { PageLayout } from "@/components/layout/PageLayout";
 

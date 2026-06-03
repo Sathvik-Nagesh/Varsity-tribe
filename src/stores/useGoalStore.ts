@@ -84,14 +84,12 @@ const mockGoals: FinancialGoal[] = [
 
 interface GoalState {
   goals: FinancialGoal[];
-  conflicts: GoalConflict[];
 
   addGoal: (
     goal: Omit<FinancialGoal, 'id' | 'milestones' | 'createdAt'>,
   ) => void;
   updateProgress: (goalId: string, amount: number) => void;
   removeGoal: (goalId: string) => void;
-  detectConflicts: (monthlyBudget: number) => void;
 }
 
 // ─── Store ───────────────────────────────────────────────────────────
@@ -100,7 +98,6 @@ export const useGoalStore = create<GoalState>()(
   persist(
     (set, get) => ({
       goals: mockGoals,
-      conflicts: [],
 
       addGoal: (goalInput) => {
         const newGoal: FinancialGoal = {
@@ -133,28 +130,7 @@ export const useGoalStore = create<GoalState>()(
       removeGoal: (goalId) => {
         set((state) => ({
           goals: state.goals.filter((g) => g.id !== goalId),
-          conflicts: state.conflicts.filter(
-            (c) => !c.goalIds.includes(goalId),
-          ),
         }));
-      },
-
-      detectConflicts: (monthlyBudget) => {
-        const { goals } = get();
-        const totalSIP = goals.reduce((sum, g) => sum + g.monthlySIP, 0);
-
-        if (totalSIP > monthlyBudget) {
-          const currency = useUserStore.getState().currency;
-          const conflict: GoalConflict = {
-            goalIds: goals.map((g) => g.id),
-            totalRequired: totalSIP,
-            budgetAvailable: monthlyBudget,
-            message: `Your total monthly SIPs (${formatCurrency(totalSIP, currency)}) exceed your available budget (${formatCurrency(monthlyBudget, currency)}). Consider adjusting your goals.`,
-          };
-          set({ conflicts: [conflict] });
-        } else {
-          set({ conflicts: [] });
-        }
       },
     }),
     {
@@ -162,3 +138,19 @@ export const useGoalStore = create<GoalState>()(
     },
   ),
 );
+
+// ─── Selectors ───────────────────────────────────────────────────────
+
+export const selectConflicts = (monthlyBudget: number) => (state: GoalState): GoalConflict[] => {
+  const totalSIP = state.goals.reduce((sum, g) => sum + g.monthlySIP, 0);
+  if (totalSIP > monthlyBudget) {
+    const currency = useUserStore.getState().currency;
+    return [{
+      goalIds: state.goals.map((g) => g.id),
+      totalRequired: totalSIP,
+      budgetAvailable: monthlyBudget,
+      message: `Your total monthly SIPs (${formatCurrency(totalSIP, currency)}) exceed your available budget (${formatCurrency(monthlyBudget, currency)}). Consider adjusting your goals.`,
+    }];
+  }
+  return [];
+};

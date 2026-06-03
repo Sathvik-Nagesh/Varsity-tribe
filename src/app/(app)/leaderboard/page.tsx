@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { motion } from 'framer-motion';
+import { mockDB } from '@/services/mockDB';
 import { IconTrophy, IconFlame, IconStar } from '@tabler/icons-react';
 import { Card, Badge, Button } from '@/components/ui';
 import { cn } from '@/lib/cn';
@@ -13,27 +14,152 @@ type LeaderboardTab = 'Top Learners' | 'Top Contributors' | 'Top Event Hosts';
 
 const TABS: LeaderboardTab[] = ['Top Learners', 'Top Contributors', 'Top Event Hosts'];
 
-const MOCK_LEADERS = [
-  { id: 'u1', name: 'Priya Sharma', xp: 12500, rank: 1, avatar: '👩🏽', title: 'Tribe Leader' },
-  { id: 'u2', name: 'Rahul Desai', xp: 11200, rank: 2, avatar: '👨🏻', title: 'Strategist' },
-  { id: 'u3', name: 'Neha Gupta', xp: 9800, rank: 3, avatar: '👩🏻', title: 'Strategist' },
-  { id: 'u4', name: 'Amit Kumar', xp: 8400, rank: 4, avatar: '👨🏽', title: 'Investor' },
-  { id: 'u5', name: 'Sarah Khan', xp: 7200, rank: 5, avatar: '👩🏽', title: 'Investor' },
-  { id: 'u6', name: 'Vikram Singh', xp: 6100, rank: 6, avatar: '👨🏼', title: 'Investor' },
-  // Current user mock
-  { id: 'u_curr', name: 'Alex Smith', xp: 1250, rank: 1024, avatar: '👤', title: 'Saver', isCurrentUser: true },
-];
+// Mock data moved to src/services/mockDB.ts
+
+/* ─── Memoized Components ───────────────────────────────────────────── */
+
+const Podium = React.memo(({ rank1, rank2, rank3, activeTab }: { rank1: any, rank2: any, rank3: any, activeTab: string }) => {
+  return (
+    <motion.div
+      key={`podium-${activeTab}`}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="flex items-end justify-center gap-1 sm:gap-6 scale-[0.85] sm:scale-100 origin-bottom w-full max-w-full"
+    >
+      {/* Rank 2 */}
+      {rank2 && (
+        <div className="flex flex-col items-center">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 bg-brand-surface-elevated rounded-full flex items-center justify-center text-3xl sm:text-4xl shadow-lg border-4 border-[#C0C0C0] relative z-10">
+            {rank2.avatar}
+            <div className="absolute -bottom-2 sm:-bottom-3 bg-[#C0C0C0] text-black text-xs sm:text-sm font-bold w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center">2</div>
+          </div>
+          <div className="h-24 sm:h-32 w-20 sm:w-28 bg-gradient-to-t from-transparent to-[#C0C0C0]/20 rounded-t-lg border-x border-t border-[#C0C0C0]/40 mt-4 flex flex-col items-center justify-start pt-3 sm:pt-4">
+            <span className="font-bold text-xs sm:text-sm text-center px-1 w-full truncate">{rank2.name}</span>
+            <span className="text-[10px] sm:text-xs text-brand-text-secondary mt-1">{rank2.xp.toLocaleString()} XP</span>
+          </div>
+        </div>
+      )}
+
+      {/* Rank 1 */}
+      {rank1 && (
+        <div className="flex flex-col items-center">
+          <div className="w-20 h-20 sm:w-28 sm:h-28 bg-brand-surface-elevated rounded-full flex items-center justify-center text-4xl sm:text-6xl shadow-xl border-4 border-[#FFD700] relative z-10">
+            {rank1.avatar}
+            <div className="absolute -top-4 sm:-top-6"><IconFlame className="text-[#FFD700] sm:w-8 sm:h-8" size={28} /></div>
+            <div className="absolute -bottom-3 sm:-bottom-4 bg-[#FFD700] text-black text-sm sm:text-base font-bold w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shadow-lg">1</div>
+          </div>
+          <div className="h-32 sm:h-44 w-24 sm:w-32 bg-gradient-to-t from-transparent to-[#FFD700]/20 rounded-t-lg border-x border-t border-[#FFD700]/40 mt-4 flex flex-col items-center justify-start pt-3 sm:pt-4">
+            <span className="font-bold text-sm sm:text-base text-center px-1 w-full truncate">{rank1.name}</span>
+            <span className="text-xs sm:text-sm text-brand-text-secondary mt-1">{rank1.xp.toLocaleString()} XP</span>
+          </div>
+        </div>
+      )}
+
+      {/* Rank 3 */}
+      {rank3 && (
+        <div className="flex flex-col items-center">
+          <div className="w-14 h-14 sm:w-20 sm:h-20 bg-brand-surface-elevated rounded-full flex items-center justify-center text-2xl sm:text-4xl shadow-md border-4 border-[#CD7F32] relative z-10">
+            {rank3.avatar}
+            <div className="absolute -bottom-2 sm:-bottom-3 bg-[#CD7F32] text-white text-xs sm:text-sm font-bold w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center">3</div>
+          </div>
+          <div className="h-20 sm:h-28 w-20 sm:w-28 bg-gradient-to-t from-transparent to-[#CD7F32]/20 rounded-t-lg border-x border-t border-[#CD7F32]/40 mt-4 flex flex-col items-center justify-start pt-3 sm:pt-4">
+            <span className="font-bold text-xs sm:text-sm text-center px-1 w-full truncate">{rank3.name}</span>
+            <span className="text-[10px] sm:text-xs text-brand-text-secondary mt-1">{rank3.xp.toLocaleString()} XP</span>
+          </div>
+        </div>
+      )}
+    </motion.div>
+  );
+});
+Podium.displayName = 'Podium';
+
+const LeaderboardTable = React.memo(({ others, activeTab }: { others: any[], activeTab: string }) => (
+  <motion.div
+    key={`table-${activeTab}`}
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    transition={{ duration: 0.4, delay: 0.2 }}
+  >
+    <div className="bg-brand-surface border border-brand-border rounded-2xl overflow-hidden w-full">
+      <div className="overflow-x-auto">
+        <table className="w-full text-left border-collapse min-w-[500px]">
+          <thead>
+            <tr className="border-b border-brand-border bg-white/5">
+              <th className="py-4 px-4 sm:px-6 text-xs sm:text-sm font-semibold text-brand-text-secondary w-16 text-center">Rank</th>
+              <th className="py-4 px-4 sm:px-6 text-xs sm:text-sm font-semibold text-brand-text-secondary">User</th>
+              <th className="py-4 px-4 sm:px-6 text-xs sm:text-sm font-semibold text-brand-text-secondary hidden sm:table-cell">Title</th>
+              <th className="py-4 px-4 sm:px-6 text-xs sm:text-sm font-semibold text-brand-text-secondary text-right">XP</th>
+            </tr>
+          </thead>
+          <tbody>
+            {others.map((user) => (
+              <tr key={user.id} className="border-b border-brand-border/50 hover:bg-white/5 transition-colors">
+                <td className="py-3 sm:py-4 px-4 sm:px-6 text-center font-bold text-brand-text-secondary text-sm sm:text-base">#{user.rank}</td>
+                <td className="py-3 sm:py-4 px-4 sm:px-6 min-w-0">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-brand-surface-elevated flex items-center justify-center text-lg sm:text-xl shrink-0">
+                      {user.avatar}
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                      <span className="font-semibold text-sm sm:text-body truncate">{user.name}</span>
+                      <span className="text-xs text-brand-text-secondary sm:hidden truncate">{user.title}</span>
+                    </div>
+                  </div>
+                </td>
+                <td className="py-3 sm:py-4 px-4 sm:px-6 text-sm text-brand-text-secondary hidden sm:table-cell truncate">{user.title}</td>
+                <td className="py-3 sm:py-4 px-4 sm:px-6 text-right font-bold text-brand-primary text-sm sm:text-base">{user.xp.toLocaleString()}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </motion.div>
+));
+LeaderboardTable.displayName = 'LeaderboardTable';
+
+const CurrentUserCard = React.memo(({ currentUser }: { currentUser: any }) => {
+  if (!currentUser) return null;
+  return (
+    <div className="sticky bottom-6 max-w-4xl mx-auto mt-12 z-20">
+      <div className="absolute inset-0 bg-gradient-to-r from-brand-primary to-brand-secondary opacity-10 rounded-[var(--radius-lg)] blur-md" />
+      <Card className="relative bg-white/90 backdrop-blur-xl border-brand-primary/30 flex items-center gap-3 sm:gap-4 py-3 sm:py-4 px-4 sm:px-6 shadow-lg">
+        <div className="w-10 sm:w-12 text-center text-xs sm:text-sm font-bold text-brand-text-secondary">
+          #{currentUser.rank}
+        </div>
+        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-brand-surface flex items-center justify-center text-lg sm:text-xl shrink-0 border border-brand-border">
+          {currentUser.avatar}
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-semibold text-sm sm:text-body text-brand-primary truncate">You</h3>
+          <p className="text-xs text-brand-text-secondary truncate">Keep going!</p>
+        </div>
+        <div className="text-right shrink-0">
+          <span className="font-bold text-sm sm:text-body">{currentUser.xp.toLocaleString()}</span>
+          <span className="text-[10px] sm:text-xs text-brand-text-muted block">XP</span>
+        </div>
+      </Card>
+    </div>
+  );
+});
+CurrentUserCard.displayName = 'CurrentUserCard';
 
 export default function LeaderboardPage() {
   const [activeTab, setActiveTab] = useState<LeaderboardTab>('Top Learners');
+  const [leaders, setLeaders] = useState<any[]>([]);
 
-  const top3 = MOCK_LEADERS.filter(u => u.rank <= 3).sort((a, b) => a.rank - b.rank);
-  const rank1 = top3.find(u => u.rank === 1);
-  const rank2 = top3.find(u => u.rank === 2);
-  const rank3 = top3.find(u => u.rank === 3);
+  useEffect(() => {
+    mockDB.getMockLeaders().then(setLeaders);
+  }, []);
 
-  const others = MOCK_LEADERS.filter(u => u.rank > 3 && !u.isCurrentUser).sort((a, b) => a.rank - b.rank);
-  const currentUser = MOCK_LEADERS.find(u => u.isCurrentUser);
+  const top3 = leaders.filter((u) => u.rank <= 3).sort((a, b) => a.rank - b.rank);
+  const rank1 = top3.find((u) => u.rank === 1);
+  const rank2 = top3.find((u) => u.rank === 2);
+  const rank3 = top3.find((u) => u.rank === 3);
+
+  const others = leaders.filter((u) => u.rank > 3 && !u.isCurrentUser).sort((a, b) => a.rank - b.rank);
+  const currentUser = leaders.find((u) => u.isCurrentUser);
 
   return (
     <PageLayout>
@@ -76,125 +202,16 @@ export default function LeaderboardPage() {
 
             {/* Podium for Top 3 */}
             <section className="mt-8 mb-12 sm:mb-16">
-              <motion.div
-                key={`podium-${activeTab}`}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="flex items-end justify-center gap-1 sm:gap-6 scale-[0.85] sm:scale-100 origin-bottom w-full max-w-full"
-              >
-                {/* Rank 2 */}
-                {rank2 && (
-                  <div className="flex flex-col items-center">
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-brand-surface-elevated rounded-full flex items-center justify-center text-3xl sm:text-4xl shadow-lg border-4 border-[#C0C0C0] relative z-10">
-                      {rank2.avatar}
-                      <div className="absolute -bottom-2 sm:-bottom-3 bg-[#C0C0C0] text-black text-xs sm:text-sm font-bold w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center">2</div>
-                    </div>
-                    <div className="h-24 sm:h-32 w-20 sm:w-28 bg-gradient-to-t from-transparent to-[#C0C0C0]/20 rounded-t-lg border-x border-t border-[#C0C0C0]/40 mt-4 flex flex-col items-center justify-start pt-3 sm:pt-4">
-                      <span className="font-bold text-xs sm:text-sm text-center px-1 w-full truncate">{rank2.name}</span>
-                      <span className="text-[10px] sm:text-xs text-brand-text-secondary mt-1">{rank2.xp.toLocaleString()} XP</span>
-                    </div>
-                  </div>
-                )}
-
-                {/* Rank 1 */}
-                {rank1 && (
-                  <div className="flex flex-col items-center">
-                    <div className="w-20 h-20 sm:w-28 sm:h-28 bg-brand-surface-elevated rounded-full flex items-center justify-center text-4xl sm:text-6xl shadow-xl border-4 border-[#FFD700] relative z-10">
-                      {rank1.avatar}
-                      <div className="absolute -top-4 sm:-top-6"><IconFlame className="text-[#FFD700] sm:w-8 sm:h-8" size={28} /></div>
-                      <div className="absolute -bottom-3 sm:-bottom-4 bg-[#FFD700] text-black text-sm sm:text-base font-bold w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shadow-lg">1</div>
-                    </div>
-                    <div className="h-32 sm:h-44 w-24 sm:w-32 bg-gradient-to-t from-transparent to-[#FFD700]/20 rounded-t-lg border-x border-t border-[#FFD700]/40 mt-4 flex flex-col items-center justify-start pt-3 sm:pt-4">
-                      <span className="font-bold text-sm sm:text-base text-center px-1 w-full truncate">{rank1.name}</span>
-                      <span className="text-xs sm:text-sm text-brand-text-secondary mt-1">{rank1.xp.toLocaleString()} XP</span>
-                    </div>
-                  </div>
-                )}
-
-                {/* Rank 3 */}
-                {rank3 && (
-                  <div className="flex flex-col items-center">
-                    <div className="w-14 h-14 sm:w-20 sm:h-20 bg-brand-surface-elevated rounded-full flex items-center justify-center text-2xl sm:text-4xl shadow-md border-4 border-[#CD7F32] relative z-10">
-                      {rank3.avatar}
-                      <div className="absolute -bottom-2 sm:-bottom-3 bg-[#CD7F32] text-white text-xs sm:text-sm font-bold w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center">3</div>
-                    </div>
-                    <div className="h-20 sm:h-28 w-20 sm:w-28 bg-gradient-to-t from-transparent to-[#CD7F32]/20 rounded-t-lg border-x border-t border-[#CD7F32]/40 mt-4 flex flex-col items-center justify-start pt-3 sm:pt-4">
-                      <span className="font-bold text-xs sm:text-sm text-center px-1 w-full truncate">{rank3.name}</span>
-                      <span className="text-[10px] sm:text-xs text-brand-text-secondary mt-1">{rank3.xp.toLocaleString()} XP</span>
-                    </div>
-                  </div>
-                )}
-              </motion.div>
+              <Podium rank1={rank1} rank2={rank2} rank3={rank3} activeTab={activeTab} />
             </section>
 
             {/* Leaderboard Table */}
             <section className="relative w-full max-w-4xl mx-auto">
-              <motion.div
-                key={`table-${activeTab}`}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.4, delay: 0.2 }}
-              >
-                <div className="bg-brand-surface border border-brand-border rounded-2xl overflow-hidden w-full">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse min-w-[500px]">
-                      <thead>
-                        <tr className="border-b border-brand-border bg-white/5">
-                          <th className="py-4 px-4 sm:px-6 text-xs sm:text-sm font-semibold text-brand-text-secondary w-16 text-center">Rank</th>
-                          <th className="py-4 px-4 sm:px-6 text-xs sm:text-sm font-semibold text-brand-text-secondary">User</th>
-                          <th className="py-4 px-4 sm:px-6 text-xs sm:text-sm font-semibold text-brand-text-secondary hidden sm:table-cell">Title</th>
-                          <th className="py-4 px-4 sm:px-6 text-xs sm:text-sm font-semibold text-brand-text-secondary text-right">XP</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {others.map((user) => (
-                          <tr key={user.id} className="border-b border-brand-border/50 hover:bg-white/5 transition-colors">
-                            <td className="py-3 sm:py-4 px-4 sm:px-6 text-center font-bold text-brand-text-secondary text-sm sm:text-base">#{user.rank}</td>
-                            <td className="py-3 sm:py-4 px-4 sm:px-6 min-w-0">
-                              <div className="flex items-center gap-3 min-w-0">
-                                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-brand-surface-elevated flex items-center justify-center text-lg sm:text-xl shrink-0">
-                                  {user.avatar}
-                                </div>
-                                <div className="flex flex-col min-w-0">
-                                  <span className="font-semibold text-sm sm:text-body truncate">{user.name}</span>
-                                  <span className="text-xs text-brand-text-secondary sm:hidden truncate">{user.title}</span>
-                                </div>
-                              </div>
-                            </td>
-                            <td className="py-3 sm:py-4 px-4 sm:px-6 text-sm text-brand-text-secondary hidden sm:table-cell truncate">{user.title}</td>
-                            <td className="py-3 sm:py-4 px-4 sm:px-6 text-right font-bold text-brand-primary text-sm sm:text-base">{user.xp.toLocaleString()}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </motion.div>
+              <LeaderboardTable others={others} activeTab={activeTab} />
             </section>
 
             {/* Sticky Current User Rank */}
-            {currentUser && (
-              <div className="sticky bottom-6 max-w-4xl mx-auto mt-12 z-20">
-                <div className="absolute inset-0 bg-gradient-to-r from-brand-primary to-brand-secondary opacity-10 rounded-[var(--radius-lg)] blur-md" />
-                <Card className="relative bg-white/90 backdrop-blur-xl border-brand-primary/30 flex items-center gap-3 sm:gap-4 py-3 sm:py-4 px-4 sm:px-6 shadow-lg">
-                  <div className="w-10 sm:w-12 text-center text-xs sm:text-sm font-bold text-brand-text-secondary">
-                    #{currentUser.rank}
-                  </div>
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-brand-surface flex items-center justify-center text-lg sm:text-xl shrink-0 border border-brand-border">
-                    {currentUser.avatar}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-sm sm:text-body text-brand-primary truncate">You</h3>
-                    <p className="text-xs text-brand-text-secondary truncate">Keep going!</p>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <span className="font-bold text-sm sm:text-body">{currentUser.xp.toLocaleString()}</span>
-                    <span className="text-[10px] sm:text-xs text-brand-text-muted block">XP</span>
-                  </div>
-                </Card>
-              </div>
-            )}
+            <CurrentUserCard currentUser={currentUser} />
           </div>
         </Container>
       </PageLayout>

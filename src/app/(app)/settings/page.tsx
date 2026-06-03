@@ -1,7 +1,7 @@
 'use client';
 
 import { useThemeStore } from '@/stores/useThemeStore';
-import { useUserStore } from '@/stores/useUserStore';
+import { useUserStore, selectLevel } from '@/stores/useUserStore';
 import { Card, Button } from '@/components/ui';
 import { IconMoon, IconSun, IconDeviceDesktop, IconBell, IconLock, IconUserEdit } from '@tabler/icons-react';
 import { motion } from 'framer-motion';
@@ -9,7 +9,8 @@ import { PageLayout } from "@/components/layout/PageLayout";
 
 export default function SettingsPage() {
   const { theme, setTheme } = useThemeStore();
-  const { xp, level, currency, setCurrency } = useUserStore();
+  const { currency, setCurrency } = useUserStore();
+  const level = useUserStore(selectLevel);
 
   return (
     <PageLayout>

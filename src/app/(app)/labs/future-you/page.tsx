@@ -6,8 +6,16 @@ import { Container } from '@/components/layout/Container';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import confetti from 'canvas-confetti';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+
+import dynamic from 'next/dynamic';
+
+const LineChart = dynamic(() => import('recharts').then((mod) => mod.LineChart), { ssr: false });
+const Line = dynamic(() => import('recharts').then((mod) => mod.Line), { ssr: false });
+const XAxis = dynamic(() => import('recharts').then((mod) => mod.XAxis), { ssr: false });
+const YAxis = dynamic(() => import('recharts').then((mod) => mod.YAxis), { ssr: false });
+const CartesianGrid = dynamic(() => import('recharts').then((mod) => mod.CartesianGrid), { ssr: false });
+const Tooltip = dynamic(() => import('recharts').then((mod) => mod.Tooltip), { ssr: false });
+const ResponsiveContainer = dynamic(() => import('recharts').then((mod) => mod.ResponsiveContainer), { ssr: false });
 import { IconCalculator, IconTrendingUp, IconArrowLeft } from '@tabler/icons-react';
 import { useUserStore } from '@/stores/useUserStore';
 import Link from 'next/link';
@@ -53,7 +61,8 @@ export default function FutureYouPage() {
     triggerConfetti();
   };
 
-  const triggerConfetti = () => {
+  const triggerConfetti = async () => {
+    const confetti = (await import('canvas-confetti')).default;
     const duration = 2 * 1000;
     const end = Date.now() + duration;
 

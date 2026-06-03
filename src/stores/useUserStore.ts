@@ -135,15 +135,9 @@ interface UserState {
   onboardingAnswers: OnboardingAnswers;
   onboardingCompleted: boolean;
 
-  // Derived
-  riskProfile: RiskProfile;
-  personaTrack: PersonaTrack;
-  recommendedActions: string[];
-  dashboardLayout: DashboardSection[];
 
   // Gamification
   xp: number;
-  level: UserLevel;
   streak: number;
   badges: Badge[];
 
@@ -193,15 +187,9 @@ export const useUserStore = create<UserState>()(
       onboardingAnswers: { ...defaultOnboardingAnswers },
       onboardingCompleted: false,
 
-      // Derived (defaults before onboarding)
-      riskProfile: 'moderate',
-      personaTrack: 'young-professional',
-      recommendedActions: [],
-      dashboardLayout: computeDashboardLayout('young-professional'),
 
       // Gamification
       xp: 0,
-      level: 'seedling',
       streak: 0,
       badges: [],
 
@@ -225,27 +213,19 @@ export const useUserStore = create<UserState>()(
         })),
 
       completeOnboarding: (answers) => {
-        const riskProfile = computeRiskProfile(answers.riskComfort, answers.investmentExperience);
-        const personaTrack = computePersonaTrack(answers.ageBracket, answers.incomeRange);
-        const recommendedActions = computeRecommendedActions(personaTrack, answers.currentGoals);
-        const dashboardLayout = computeDashboardLayout(personaTrack);
-
         set({
           onboardingAnswers: answers,
           onboardingCompleted: true,
-          riskProfile,
-          personaTrack,
-          recommendedActions,
-          dashboardLayout,
         });
       },
 
       addXP: (amount) =>
         set((state) => {
+          const currentLevel = computeLevel(state.xp);
           const newXP = state.xp + amount;
           const newLevel = computeLevel(newXP);
           
-          if (newLevel !== state.level) {
+          if (newLevel !== currentLevel) {
             toast.success(`🚀 Level Up! Welcome to ${newLevel} level.`, { 
               duration: 5000,
               icon: React.createElement('img', { src: '/logo.png', alt: 'TRIBE', style: { height: '16px', marginRight: '4px' } })
@@ -257,7 +237,7 @@ export const useUserStore = create<UserState>()(
             });
           }
 
-          return { xp: newXP, level: newLevel };
+          return { xp: newXP };
         }),
       
       recalculateHealthScore: () => set((state) => ({ ...state })),
@@ -269,3 +249,10 @@ export const useUserStore = create<UserState>()(
     },
   ),
 );
+
+// --- Selectors -------------------------------------------------------
+export const selectRiskProfile = (state: UserState) => computeRiskProfile(state.onboardingAnswers.riskComfort, state.onboardingAnswers.investmentExperience);
+export const selectPersonaTrack = (state: UserState) => computePersonaTrack(state.onboardingAnswers.ageBracket, state.onboardingAnswers.incomeRange);
+export const selectRecommendedActions = (state: UserState) => computeRecommendedActions(selectPersonaTrack(state), state.onboardingAnswers.currentGoals);
+export const selectDashboardLayout = (state: UserState) => computeDashboardLayout(selectPersonaTrack(state));
+export const selectLevel = (state: UserState) => computeLevel(state.xp);

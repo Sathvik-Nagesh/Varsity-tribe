@@ -83,11 +83,11 @@ function ProgressBar({
         <RadixProgress.Indicator asChild>
           <motion.div
             className={cn(
-              'h-full rounded-full',
+              'h-full rounded-full w-full origin-left',
               colorStyles[color]
             )}
-            initial={{ width: 0 }}
-            animate={{ width: `${pct}%` }}
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: pct / 100 }}
             transition={{ duration: 0.6, ease: 'easeOut' }}
           />
         </RadixProgress.Indicator>
