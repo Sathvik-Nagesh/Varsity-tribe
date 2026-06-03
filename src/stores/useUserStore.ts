@@ -254,5 +254,5 @@ export const useUserStore = create<UserState>()(
 export const selectRiskProfile = (state: UserState) => computeRiskProfile(state.onboardingAnswers.riskComfort, state.onboardingAnswers.investmentExperience);
 export const selectPersonaTrack = (state: UserState) => computePersonaTrack(state.onboardingAnswers.ageBracket, state.onboardingAnswers.incomeRange);
 export const selectRecommendedActions = (state: UserState) => computeRecommendedActions(selectPersonaTrack(state), state.onboardingAnswers.currentGoals);
-export const selectDashboardLayout = (state: UserState) => computeDashboardLayout(selectPersonaTrack(state));
 export const selectLevel = (state: UserState) => computeLevel(state.xp);
+

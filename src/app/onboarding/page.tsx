@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useSyncExternalStore } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -89,7 +90,7 @@ export default function OnboardingPage() {
   const { completeOnboarding, setCurrency, currency: currencyStore } = useUserStore();
   const riskProfile = useUserStore(selectRiskProfile);
   const personaTrack = useUserStore(selectPersonaTrack);
-  const recommendedActions = useUserStore(selectRecommendedActions);
+  const recommendedActions = useUserStore(useShallow(selectRecommendedActions));
 
   /* hydration guard */
   const mounted = useSyncExternalStore(

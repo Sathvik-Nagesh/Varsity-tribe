@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { mockDB } from '@/services/mockDB';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useShallow } from 'zustand/react/shallow';
 import {
   IconBulb,
   IconX,
@@ -343,10 +344,10 @@ export default function DashboardPage() {
   const { onboardingCompleted, xp, streak, currency } = useUserStore();
   const personaTrack = useUserStore(selectPersonaTrack);
   const level = useUserStore(selectLevel);
-  const recommendedActions = useUserStore(selectRecommendedActions);
+  const recommendedActions = useUserStore(useShallow(selectRecommendedActions));
 
   const { goals } = useGoalStore();
-  const conflicts = useGoalStore(selectConflicts(50000)); // Hardcoded budget for now since it was a mock
+  const conflicts = useGoalStore(useShallow(selectConflicts(50000))); // Hardcoded budget for now since it was a mock
 
   /* ── Pre-mount: skeleton ── */
   if (!mounted) return <LoadingSkeleton />;
