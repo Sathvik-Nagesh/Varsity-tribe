@@ -1,8 +1,8 @@
-import {
-  IconCalculator,
-  IconTarget,
-  IconReceipt,
-  IconChartPie,
+import { 
+  IconTrophy, IconStar, IconFlame, IconTarget, 
+  IconMessageCircle, IconCalendarEvent, IconUsers,
+  IconChartBar, IconBriefcase, IconBuildingBank,
+  IconCalculator, IconChartPie, IconSunHigh
 } from '@tabler/icons-react';
 
 export const upcomingEvents = [
@@ -29,9 +29,9 @@ export const topLeaders = [
 ];
 
 export const quickTools = [
-  { icon: IconCalculator, title: 'SIP Calculator', description: 'Project your SIP returns', color: 'bg-brand-primary/10 text-brand-primary', href: '/tools/sip' },
-  { icon: IconTarget, title: 'Goal Planner', description: 'Plan your financial goals', color: 'bg-brand-success/10 text-brand-success', href: '/tools' },
-  { icon: IconReceipt, title: 'EMI Calculator', description: 'Calculate your EMIs', color: 'bg-brand-warning/10 text-brand-warning', href: '/tools/emi' },
+  { icon: IconCalculator, title: 'SIP Growth', description: 'Project your SIP returns', color: 'bg-brand-primary/10 text-brand-primary', href: '/learn/sip-growth' },
+  { icon: IconTarget, title: 'Emergency Fund', description: 'Plan your safety net', color: 'bg-brand-success/10 text-brand-success', href: '/learn/emergency-fund' },
+  { icon: IconSunHigh, title: 'Retirement Planner', description: 'Plan for the future', color: 'bg-brand-warning/10 text-brand-warning', href: '/learn/retirement-planner' },
   { icon: IconChartPie, title: 'Portfolio Check', description: 'Analyse your portfolio', color: 'bg-brand-danger/10 text-brand-danger', href: '/tools/portfolio' },
 ];
 

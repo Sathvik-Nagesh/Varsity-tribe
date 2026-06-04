@@ -188,22 +188,24 @@ const QuickToolsList = React.memo(({ tools }: { tools: any[] }) => (
       const ToolIcon = tool.icon;
       return (
         <Link key={tool.title} href={tool.href}>
-          <Card hoverable className="p-4 h-full cursor-pointer">
-            <div className="space-y-3">
-              <div
-                className={cn(
-                  'flex h-10 w-10 items-center justify-center rounded-full',
-                  tool.color
-                )}
-              >
-                <ToolIcon size={20} />
+          <motion.div whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(56, 126, 209, 0.4)" }} transition={{ duration: 0.2 }} className="h-full rounded-2xl">
+            <Card hoverable className="p-4 h-full cursor-pointer">
+              <div className="space-y-3">
+                <div
+                  className={cn(
+                    'flex h-10 w-10 items-center justify-center rounded-full',
+                    tool.color
+                  )}
+                >
+                  <ToolIcon size={20} />
+                </div>
+                <h3 className="text-h3">{tool.title}</h3>
+                <p className="text-small text-brand-text-secondary">
+                  {tool.description}
+                </p>
               </div>
-              <h3 className="text-h3">{tool.title}</h3>
-              <p className="text-small text-brand-text-secondary">
-                {tool.description}
-              </p>
-            </div>
-          </Card>
+            </Card>
+          </motion.div>
         </Link>
       );
     })}
@@ -385,17 +387,17 @@ export default function DashboardPage() {
               <div className="lg:col-span-2 space-y-6">
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div className="space-y-1">
-                    <h1 className="text-h1">{greeting} 👋</h1>
-                    <Badge variant="primary" size="md">
-                      {formatTrackLabel(personaTrack)}
-                    </Badge>
+                    <h1 className="text-h1">Good Morning, Sathvik 👋</h1>
+                    <p className="text-body text-brand-text-secondary mt-1">Ready to continue your financial journey?</p>
+                    <div className="mt-2">
+                      <Badge variant="primary" size="md">
+                        {formatTrackLabel(level)} • Level {Math.floor(xp / 500) + 1}
+                      </Badge>
+                    </div>
                   </div>
                   <div className="flex flex-col items-end gap-1">
                     <span className="text-h3 font-mono text-brand-primary">{xp} XP</span>
                     <span className="text-small text-brand-text-secondary">🔥 {streak} day streak</span>
-                    <Badge variant={levelBadgeVariant[level]} size="sm">
-                      {formatTrackLabel(level)}
-                    </Badge>
                   </div>
                 </div>
                 
@@ -435,6 +437,46 @@ export default function DashboardPage() {
                   </div>
                   <p className="text-small text-brand-text-secondary mt-2">Your financial foundation is looking strong!</p>
                   <ProgressBar value={74.2} max={100} color="success" size="sm" className="mt-4" />
+                </Card>
+              </div>
+            </div>
+          </Section>
+
+          {/* ═══ B. Continue Learning & Live Activity ═══ */}
+          <Section delay={0.05}>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 space-y-4">
+                <h2 className="text-h2">Continue Learning</h2>
+                <Card variant="elevated" className="p-6">
+                  <div className="flex flex-col sm:flex-row items-center gap-6">
+                    <div className="w-16 h-16 rounded-full bg-brand-primary/10 flex items-center justify-center shrink-0">
+                      <IconSchool size={32} className="text-brand-primary" />
+                    </div>
+                    <div className="flex-1 w-full space-y-2">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-h3">Investing 101</h3>
+                        <span className="text-small font-medium text-brand-primary">75% Complete</span>
+                      </div>
+                      <ProgressBar value={75} max={100} color="primary" size="md" />
+                      <p className="text-small text-brand-text-secondary mt-1">
+                        Next up: Understanding the power of compounding.
+                      </p>
+                    </div>
+                    <Button variant="primary" className="w-full sm:w-auto">
+                      Resume
+                    </Button>
+                  </div>
+                </Card>
+              </div>
+
+              <div className="lg:col-span-1 space-y-4">
+                <h2 className="text-h2">Live Activity Feed</h2>
+                <Card variant="default" className="p-4 h-[120px] overflow-y-auto">
+                  <LiveActivitiesList activities={[
+                    { id: 1, user: 'Priya', action: 'completed Investing 101', time: 'just now' },
+                    { id: 2, user: 'Rahul', action: 'started SIP in Index Funds', time: '5m ago' },
+                    { id: 3, user: 'Anjali', action: 'earned "Debt Free" badge', time: '12m ago' }
+                  ]} />
                 </Card>
               </div>
             </div>
@@ -559,41 +601,7 @@ export default function DashboardPage() {
             </div>
           </Section>
 
-          {/* ═══ E. Continue Learning & Live Activity ═══ */}
-          <Section delay={0.2}>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 space-y-4">
-                <h2 className="text-h2">Continue Learning</h2>
-                <Card variant="elevated" className="p-6">
-                  <div className="flex flex-col sm:flex-row items-center gap-6">
-                    <div className="w-16 h-16 rounded-full bg-brand-primary/10 flex items-center justify-center shrink-0">
-                      <IconSchool size={32} className="text-brand-primary" />
-                    </div>
-                    <div className="flex-1 w-full space-y-2">
-                      <div className="flex items-center justify-between">
-                        <h3 className="text-h3">Salary Negotiation</h3>
-                        <span className="text-small font-medium text-brand-primary">75% Complete</span>
-                      </div>
-                      <ProgressBar value={75} max={100} color="primary" size="md" />
-                      <p className="text-small text-brand-text-secondary mt-1">
-                        Next up: Leveraging market data for your counter-offer.
-                      </p>
-                    </div>
-                    <Button variant="primary" className="w-full sm:w-auto">
-                      Resume
-                    </Button>
-                  </div>
-                </Card>
-              </div>
 
-              <div className="lg:col-span-1 space-y-4">
-                <h2 className="text-h2">Live Activity</h2>
-                <Card variant="default" className="p-4 h-[120px] overflow-y-auto">
-                  <LiveActivitiesList activities={activities} />
-                </Card>
-              </div>
-            </div>
-          </Section>
 
           {/* ═══ F. Quick Tools ═══ */}
           <Section delay={0.25}>

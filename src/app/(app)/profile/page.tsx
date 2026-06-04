@@ -12,6 +12,7 @@ import { USER_LEVELS } from '@/types';
 import { cn } from '@/lib/cn';
 import { PageLayout } from "@/components/layout/PageLayout";
 import { Container } from "@/components/layout/Container";
+import Link from 'next/link';
 
 const RECENT_ACTIVITY = [
   { id: 1, title: 'Completed Salary Negotiation Lab', xp: '+50 XP', time: '2h ago' },
@@ -40,7 +41,7 @@ const FINANCIAL_DNA = {
 };
 
 export default function ProfilePage() {
-  const { xp, streak } = useUserStore();
+  const { xp, streak, badges } = useUserStore();
   const level = useUserStore(selectLevel);
   const [activeTab, setActiveTab] = useState('Goals');
 
@@ -106,6 +107,9 @@ export default function ProfilePage() {
                           {targetXP - currentXP} XP until {nextLevelInfo.name}
                         </p>
                       )}
+                      <Link href="/how-xp-works" className="text-[10px] text-brand-primary font-medium mt-1 inline-block hover:underline">
+                        How XP Works &rarr;
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -179,16 +183,19 @@ export default function ProfilePage() {
             <h2 className="text-h4 mb-4 flex items-center gap-2">
               <IconMedal className="text-brand-warning" /> Achievements
             </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-              {MOCK_BADGES.map((badge) => (
-                <Card key={badge.id} hoverable className={cn("p-5 text-center flex flex-col items-center justify-center gap-3 transition-all", badge.unlocked ? "border-brand-warning/30 bg-gradient-to-b from-brand-warning/10 to-brand-surface shadow-sm" : "grayscale opacity-50 bg-brand-surface-elevated")}>
-                  <div className="text-4xl relative">
-                    {badge.icon}
-                    {!badge.unlocked && <IconLock size={16} className="absolute -bottom-1 -right-1 text-brand-text-tertiary bg-brand-surface rounded-full p-0.5 shadow-sm border border-brand-border" />}
-                  </div>
-                  <span className="text-xs font-bold text-brand-text-secondary uppercase tracking-wide">{badge.name}</span>
-                </Card>
-              ))}
+            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-4">
+              {badges.map((badge) => {
+                const unlocked = !!badge.earnedAt;
+                return (
+                  <Card key={badge.id} hoverable className={cn("p-4 text-center flex flex-col items-center justify-center gap-3 transition-all", unlocked ? "border-brand-warning/30 bg-gradient-to-b from-brand-warning/10 to-brand-surface shadow-sm" : "grayscale opacity-50 bg-brand-surface-elevated")}>
+                    <div className="text-4xl relative">
+                      {badge.icon}
+                      {!unlocked && <IconLock size={16} className="absolute -bottom-1 -right-1 text-brand-text-tertiary bg-brand-surface rounded-full p-0.5 shadow-sm border border-brand-border" />}
+                    </div>
+                    <span className="text-[10px] font-bold text-brand-text-secondary uppercase tracking-wide leading-tight">{badge.name}</span>
+                  </Card>
+                );
+              })}
             </div>
           </section>
 
@@ -238,7 +245,7 @@ export default function ProfilePage() {
           {/* ROW 5: Content Tabs (Goals, Recent Activity, Bookmarks) */}
           <section>
             <div className="flex gap-2 overflow-x-auto no-scrollbar mb-6 border-b border-brand-border pb-px">
-              {['Goals', 'Recent Activity', 'Bookmarks', 'Events'].map(tab => (
+              {['Goals', 'XP Activity Log', 'Bookmarks', 'Events'].map(tab => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
@@ -274,7 +281,7 @@ export default function ProfilePage() {
                 </div>
               )}
 
-              {activeTab === 'Recent Activity' && (
+              {activeTab === 'XP Activity Log' && (
                 <Card className="p-0 overflow-hidden divide-y divide-brand-border border-brand-border">
                   {RECENT_ACTIVITY.map(act => (
                     <div key={act.id} className="p-4 sm:p-5 flex items-center justify-between hover:bg-brand-surface-elevated transition-colors cursor-pointer group">

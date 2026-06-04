@@ -135,7 +135,7 @@ export function MobileNav() {
                 onClick={() => handleAction(tab.action!)}
                 className={cn(
                   'relative flex flex-col items-center gap-0.5 px-3 py-2 transition-colors flex-shrink-0',
-                  activeAction === tab.action ? 'text-blue-600' : 'text-slate-500'
+                  activeAction === tab.action ? 'text-brand-primary font-semibold bg-brand-primary/10 rounded-xl' : 'text-slate-500'
                 )}
               >
                 <Icon size={22} stroke={activeAction === tab.action ? 2 : 1.5} />
@@ -151,13 +151,13 @@ export function MobileNav() {
                 onClick={() => setActiveAction(null)}
                 className={cn(
                   'relative flex flex-col items-center gap-0.5 px-3 py-2 transition-colors flex-shrink-0',
-                  isActive ? 'text-blue-600' : 'text-slate-500'
+                  isActive ? 'text-brand-primary font-semibold bg-brand-primary/10 rounded-xl' : 'text-slate-500'
                 )}
               >
                 {isActive && (
                   <motion.div
                     layoutId="mobile-tab-indicator"
-                    className="absolute -top-1 left-1/2 h-0.5 w-8 -translate-x-1/2 rounded-full bg-blue-600"
+                    className="absolute -top-1 left-1/2 h-0.5 w-8 -translate-x-1/2 rounded-full bg-brand-primary"
                     transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                   />
                 )}

@@ -156,7 +156,7 @@ const REGIONS = {
     title: 'Investment City',
     description: 'Build your wealth block by block. Explore stocks, mutual funds, and crypto.',
     color: 'bg-blue-500',
-    link: '/labs/compound-interest'
+    link: '/learn/compound-interest'
   },
   retire: {
     id: 'retire',

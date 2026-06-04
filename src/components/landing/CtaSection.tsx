@@ -81,7 +81,7 @@ export function CtaSection() {
   const { currency } = useUserStore();
   const stories = getStories(currency);
   // Get just the symbol
-  const symbol = formatCurrency(0, currency).replace(/[\d.,\s]/g, '') || (currency === 'USD' ? '$' : '₹');
+  const symbol = '₹';
 
   return (
     <>

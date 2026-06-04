@@ -9,7 +9,7 @@ import { cn } from '@/lib/cn';
 const cardVariants = {
   default: 'bg-white border border-slate-200 shadow-sm',
   elevated: 'bg-white border border-slate-200 shadow-[0_8px_30px_-4px_rgba(0,0,0,0.1)]',
-  glass: 'bg-white/80 backdrop-blur-2xl border border-slate-200/50 shadow-sm',
+  glass: 'bg-white border border-slate-200 shadow-md',
 } as const;
 
 /* ── Props ── */

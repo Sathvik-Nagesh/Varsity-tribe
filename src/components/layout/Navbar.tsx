@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
@@ -73,7 +74,6 @@ function AvatarDropdown() {
             <Link onClick={handleClick} href="/profile" className="block rounded-lg px-3 py-2 text-sm text-slate-700 transition-colors hover:bg-slate-50 hover:text-slate-900 font-medium">Profile</Link>
             <Link onClick={handleClick} href="/goals" className="block rounded-lg px-3 py-2 text-sm text-slate-700 transition-colors hover:bg-slate-50 hover:text-slate-900 font-medium">Goals</Link>
             <Link onClick={handleClick} href="/leaderboard" className="block rounded-lg px-3 py-2 text-sm text-slate-700 transition-colors hover:bg-slate-50 hover:text-slate-900 font-medium">Leaderboard</Link>
-            <Link onClick={handleClick} href="/labs" className="block rounded-lg px-3 py-2 text-sm text-slate-700 transition-colors hover:bg-slate-50 hover:text-slate-900 font-medium">Labs</Link>
             <Link onClick={handleClick} href="/settings" className="block rounded-lg px-3 py-2 text-sm text-slate-700 transition-colors hover:bg-slate-50 hover:text-slate-900 font-medium">Settings</Link>
           </motion.div>
         )}
@@ -83,6 +83,7 @@ function AvatarDropdown() {
 }
 
 export function Navbar() {
+  const pathname = usePathname();
   const { xp } = useUserStore();
   const { scrollY } = useScroll();
   const [scrolled, setScrolled] = useState(false);
@@ -117,22 +118,30 @@ export function Navbar() {
             alt="Varsity Tribe"
             width={180}
             height={50}
-            className="h-10 md:h-12 w-auto"
+            className="h-12 md:h-14 w-auto"
             priority
           />
         </Link>
 
         {/* Desktop Nav */}
         <nav className="hidden items-center gap-2 md:flex flex-1 ml-8">
-          {mainNavLinks.map((link) => (
-            <Link
-              key={link.label}
-              href={link.href}
-              className="rounded-[var(--radius-md)] px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 hover:text-slate-900"
-            >
-              {link.label}
-            </Link>
-          ))}
+          {mainNavLinks.map((link) => {
+            const isActive = pathname.startsWith(link.href) || (link.href === '/' && pathname === '/');
+            return (
+              <Link
+                key={link.label}
+                href={link.href}
+                className={cn(
+                  "rounded-[var(--radius-md)] px-3 py-2 text-sm transition-colors",
+                  isActive 
+                    ? "text-brand-primary font-semibold bg-brand-primary/10" 
+                    : "font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+                )}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
         </nav>
 
         {/* Right Section */}
@@ -176,6 +185,18 @@ export function Navbar() {
                 </motion.div>
               )}
             </AnimatePresence>
+          </div>
+
+          {/* Streak Badge */}
+          <div className="hidden sm:flex items-center gap-1.5 rounded-full bg-orange-50 px-3 py-1.5 border border-orange-200">
+            <motion.span 
+              animate={{ scale: [1, 1.2, 1], rotate: [0, -5, 5, 0] }}
+              transition={{ duration: 1.5, repeat: Infinity, repeatType: "reverse" }}
+              className="text-sm origin-bottom"
+            >
+              🔥
+            </motion.span>
+            <span className="text-small font-medium text-orange-600">14 Day Streak</span>
           </div>
 
           {/* XP Badge */}

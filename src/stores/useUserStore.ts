@@ -142,7 +142,7 @@ interface UserState {
   badges: Badge[];
 
   // Preferences
-  currency: 'INR' | 'USD' | 'EUR' | 'GBP';
+  currency: 'INR';
 
   // Financial Health
   financialHealthScore: number;
@@ -162,7 +162,7 @@ interface UserState {
   completeOnboarding: (answers: OnboardingAnswers) => void;
   addXP: (amount: number) => void;
   recalculateHealthScore: () => void;
-  setCurrency: (currency: 'INR' | 'USD' | 'EUR' | 'GBP') => void;
+  setCurrency: (currency: 'INR') => void;
 }
 
 // ─── Default Values ──────────────────────────────────────────────────
@@ -191,7 +191,15 @@ export const useUserStore = create<UserState>()(
       // Gamification
       xp: 0,
       streak: 0,
-      badges: [],
+      badges: [
+        { id: '1', name: 'First Goal Created', description: 'Created your first financial goal', icon: '🎯', category: 'learning', earnedAt: new Date().toISOString() },
+        { id: '2', name: '7 Day Streak', description: 'Maintained a learning streak for 7 days', icon: '🔥', category: 'streak', earnedAt: new Date().toISOString() },
+        { id: '3', name: 'First Investment', description: 'Simulated your first investment', icon: '📈', category: 'learning', earnedAt: new Date().toISOString() },
+        { id: '4', name: 'Budget Master', description: 'Completed the budget module', icon: '📝', category: 'learning', earnedAt: new Date().toISOString() },
+        { id: '5', name: 'Debt Destroyer', description: 'Created a debt payoff plan', icon: '⚔️', category: 'learning' },
+        { id: '6', name: 'Emergency Ready', description: 'Saved 6 months of expenses', icon: '🛡️', category: 'learning' },
+        { id: '7', name: 'Future Millionaire', description: 'Projected net worth over 1Cr', icon: '💎', category: 'learning' },
+      ],
 
       // Preferences
       currency: 'INR',

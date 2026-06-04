@@ -120,7 +120,7 @@ export default function OnboardingPage() {
   const [worry, setWorry] = useState('');
   const [worryOther, setWorryOther] = useState('');
   const [isWorryOther, setIsWorryOther] = useState(false);
-  const [currency, setCurrencyLocal] = useState<'INR' | 'USD' | 'EUR' | 'GBP' | null>(null);
+
 
   /* ── Validation per step ── */
   function isStepValid(): boolean {
@@ -145,8 +145,6 @@ export default function OnboardingPage() {
         return isWorryOther
           ? worryOther.trim().length > 0
           : worry.length > 0;
-      case 9:
-        return currency !== null;
       default:
         return true;
     }
@@ -154,7 +152,7 @@ export default function OnboardingPage() {
 
   /* ── Navigation ── */
   function goNext() {
-    if (step === 9) {
+    if (step === 8) {
       const answers: OnboardingAnswers = {
         ageBracket,
         incomeRange,
@@ -166,7 +164,6 @@ export default function OnboardingPage() {
         biggestFinancialWorry: isWorryOther ? worryOther : worry,
       };
       completeOnboarding(answers);
-      if (currency) setCurrency(currency);
       setDirection(1);
       setStep(10);
       return;
@@ -663,33 +660,7 @@ export default function OnboardingPage() {
               </>
             )}
 
-            {/* ── Step 9: Currency ── */}
-            {step === 9 && (
-              <>
-                <StepHeader title="Choose your preferred currency" />
-                <div className="grid grid-cols-2 gap-3">
-                  {(
-                    [
-                      { emoji: '₹', label: 'Indian Rupee (INR)', value: 'INR' },
-                      { emoji: '$', label: 'US Dollar (USD)', value: 'USD' },
-                      { emoji: '€', label: 'Euro (EUR)', value: 'EUR' },
-                      { emoji: '£', label: 'British Pound (GBP)', value: 'GBP' },
-                    ] as const
-                  ).map((opt) => (
-                    <OptionCard
-                      key={opt.value}
-                      selected={currency === opt.value}
-                      onClick={() => setCurrencyLocal(opt.value as any)}
-                    >
-                      <span className="text-2xl mb-1 font-bold">{opt.emoji}</span>
-                      <span className="text-body font-medium text-brand-text-primary">
-                        {opt.label}
-                      </span>
-                    </OptionCard>
-                  ))}
-                </div>
-              </>
-            )}
+
           </motion.div>
         </AnimatePresence>
       </div>

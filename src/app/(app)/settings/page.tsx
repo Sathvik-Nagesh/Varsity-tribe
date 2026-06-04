@@ -1,14 +1,12 @@
 'use client';
 
-import { useThemeStore } from '@/stores/useThemeStore';
 import { useUserStore, selectLevel } from '@/stores/useUserStore';
 import { Card, Button } from '@/components/ui';
-import { IconMoon, IconSun, IconDeviceDesktop, IconBell, IconLock, IconUserEdit } from '@tabler/icons-react';
+import { IconBell, IconLock, IconUserEdit } from '@tabler/icons-react';
 import { motion } from 'framer-motion';
 import { PageLayout } from "@/components/layout/PageLayout";
 
 export default function SettingsPage() {
-  const { theme, setTheme } = useThemeStore();
   const { currency, setCurrency } = useUserStore();
   const level = useUserStore(selectLevel);
 
@@ -32,10 +30,6 @@ export default function SettingsPage() {
                 Profile Settings
               </button>
               <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-brand-text-secondary hover:bg-brand-surface-elevated transition-colors text-left">
-                <IconDeviceDesktop size={20} />
-                Appearance
-              </button>
-              <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-brand-text-secondary hover:bg-brand-surface-elevated transition-colors text-left">
                 <IconBell size={20} />
                 Notifications
               </button>
@@ -47,32 +41,7 @@ export default function SettingsPage() {
 
             {/* Settings Content */}
             <div className="md:col-span-2 space-y-6">
-              <Card className="p-6 glass-strong">
-                <h3 className="text-h3 font-semibold mb-4 text-brand-text-primary">Appearance</h3>
-                <div className="grid grid-cols-3 gap-4">
-                  <button 
-                    onClick={() => setTheme('light')}
-                    className={`p-4 rounded-xl border flex flex-col items-center gap-2 transition-all ${theme === 'light' ? 'border-brand-primary bg-brand-primary/5' : 'border-brand-border hover:border-brand-border-strong'}`}
-                  >
-                    <IconSun size={24} className={theme === 'light' ? 'text-brand-primary' : 'text-brand-text-secondary'} />
-                    <span className={`text-small font-medium ${theme === 'light' ? 'text-brand-primary' : 'text-brand-text-secondary'}`}>Light</span>
-                  </button>
-                  <button 
-                    onClick={() => setTheme('dark')}
-                    className={`p-4 rounded-xl border flex flex-col items-center gap-2 transition-all ${theme === 'dark' ? 'border-brand-primary bg-brand-primary/5' : 'border-brand-border hover:border-brand-border-strong'}`}
-                  >
-                    <IconMoon size={24} className={theme === 'dark' ? 'text-brand-primary' : 'text-brand-text-secondary'} />
-                    <span className={`text-small font-medium ${theme === 'dark' ? 'text-brand-primary' : 'text-brand-text-secondary'}`}>Dark</span>
-                  </button>
-                  <button 
-                    onClick={() => setTheme('system')}
-                    className={`p-4 rounded-xl border flex flex-col items-center gap-2 transition-all ${theme === 'system' ? 'border-brand-primary bg-brand-primary/5' : 'border-brand-border hover:border-brand-border-strong'}`}
-                  >
-                    <IconDeviceDesktop size={24} className={theme === 'system' ? 'text-brand-primary' : 'text-brand-text-secondary'} />
-                    <span className={`text-small font-medium ${theme === 'system' ? 'text-brand-primary' : 'text-brand-text-secondary'}`}>System</span>
-                  </button>
-                </div>
-              </Card>
+
 
               <Card className="p-6 glass-strong">
                 <h3 className="text-h3 font-semibold mb-4 text-brand-text-primary">Preferences</h3>

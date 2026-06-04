@@ -21,19 +21,21 @@ function ErrorFallback() {
 }
 
 import dynamic from 'next/dynamic';
+import CompoundInterestChart from './CompoundInterestChart';
+import CompoundInterestTable from './CompoundInterestTable';
 const CompoundInterest3D = dynamic(() => import('./CompoundInterest3D'), { ssr: false });
 
-const localFormatCurrency = (val: number) =>
-  new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  }).format(val);
+type ViewMode = '3d' | 'chart' | 'table';
+
+import { formatCurrency } from "@/lib/formatCurrency";
 
 export default function CompoundInterestLab() {
-  const [monthlyInvestment, setMonthlyInvestment] = useState(500);
-  const [years, setYears] = useState(30);
-  const [expectedReturn, setExpectedReturn] = useState(8);
+  const [monthlyInvestment, setMonthlyInvestment] = useState(5000);
+  const [currentAge, setCurrentAge] = useState(22);
+  const retirementAge = 60;
+  const years = Math.max(1, retirementAge - currentAge);
+  const [expectedReturn, setExpectedReturn] = useState(12);
+  const [viewMode, setViewMode] = useState<ViewMode>('3d');
 
   const monthlyRate = expectedReturn / 100 / 12;
   const months = years * 12;
@@ -71,23 +73,23 @@ export default function CompoundInterestLab() {
             <div className="bg-brand-surface-elevated rounded-xl p-5 border border-brand-border/60 space-y-4">
               <div>
                 <p className="text-xs text-brand-text-secondary font-bold uppercase tracking-wider mb-1">
-                  Future Value
+                  Future Value (at Age 60)
                 </p>
                 <p className="text-4xl font-display text-brand-text-primary">
-                  {localFormatCurrency(futureValue)}
+                  {formatCurrency(futureValue)}
                 </p>
               </div>
               <div className="grid grid-cols-2 gap-4 pt-4 border-t border-brand-border/60">
                 <div>
                   <p className="text-[10px] text-brand-text-tertiary font-bold uppercase tracking-wider mb-1">Contributions</p>
                   <p className="text-base font-semibold text-brand-text-secondary">
-                    {localFormatCurrency(totalContributions)}
+                    {formatCurrency(totalContributions)}
                   </p>
                 </div>
                 <div>
                   <p className="text-[10px] text-brand-success font-bold uppercase tracking-wider mb-1">Total Interest</p>
                   <p className="text-base font-semibold text-brand-success">
-                    {localFormatCurrency(totalInterest)}
+                    {formatCurrency(totalInterest)}
                   </p>
                 </div>
               </div>
@@ -102,7 +104,7 @@ export default function CompoundInterestLab() {
                     Monthly Investment
                   </label>
                   <span className="text-sm font-bold text-brand-primary bg-brand-primary/10 px-2 py-1 rounded-md border border-brand-primary/20">
-                    {localFormatCurrency(monthlyInvestment)}
+                    {formatCurrency(monthlyInvestment)}
                   </span>
                 </div>
                 <Slider.Root
@@ -119,23 +121,41 @@ export default function CompoundInterestLab() {
                 </Slider.Root>
               </div>
 
-              {/* Years */}
+              {/* Timeline Scrubber */}
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <label className="text-sm font-semibold text-brand-text-primary">
-                    Years to Grow
+                    Current Age
                   </label>
                   <span className="text-sm font-bold text-brand-secondary bg-brand-secondary/10 px-2 py-1 rounded-md border border-brand-secondary/20">
-                    {years} Years
+                    {currentAge} Years
                   </span>
                 </div>
+                
+                {/* Quick Select Ages */}
+                <div className="flex gap-2">
+                  {[22, 30, 40, 60].map((age) => (
+                    <button
+                      key={age}
+                      onClick={() => setCurrentAge(age)}
+                      className={`flex-1 py-1.5 text-xs font-semibold rounded-md border transition-all ${
+                        currentAge === age
+                          ? 'bg-brand-secondary text-white border-brand-secondary'
+                          : 'bg-white text-brand-text-secondary border-brand-border hover:border-brand-secondary/50'
+                      }`}
+                    >
+                      Age {age}
+                    </button>
+                  ))}
+                </div>
+
                 <Slider.Root
                   className="relative flex items-center select-none touch-none w-full h-5"
-                  value={[years]}
-                  max={50}
-                  min={1}
+                  value={[currentAge]}
+                  max={60}
+                  min={18}
                   step={1}
-                  onValueChange={(val) => setYears(val[0])}
+                  onValueChange={(val) => setCurrentAge(val[0])}
                 >
                   <Slider.Track className="bg-brand-surface-elevated border border-brand-border relative grow rounded-full h-2.5 overflow-hidden">
                     <Slider.Range className="absolute bg-brand-secondary h-full" />
@@ -171,20 +191,71 @@ export default function CompoundInterestLab() {
             </div>
           </Card>
 
-          {/* 3D Canvas Container */}
-          <Card variant="elevated" className="flex-1 relative min-h-[500px] w-full overflow-hidden p-0 bg-gradient-to-br from-[#f8fafc] to-[#e2e8f0] border-brand-border">
-            <ErrorBoundary FallbackComponent={ErrorFallback}>
-              <div className="absolute inset-0">
-                <CompoundInterest3D
-                  monthlyInvestment={monthlyInvestment}
-                  years={years}
-                  expectedReturn={expectedReturn}
-                />
-              </div>
-            </ErrorBoundary>
-            
-            <div className="absolute bottom-6 right-6 text-xs text-brand-text-tertiary font-medium bg-white/50 backdrop-blur-md px-3 py-1.5 rounded-full shadow-sm pointer-events-none">
-              Drag to rotate • Scroll to zoom
+          {/* Visualization Container */}
+          <Card variant="elevated" className="flex-1 flex flex-col relative min-h-[500px] w-full overflow-hidden p-0 bg-gradient-to-br from-[#f8fafc] to-[#e2e8f0] border-brand-border">
+            {/* View Toggle */}
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex bg-white/80 backdrop-blur-md p-1 rounded-xl shadow-sm border border-slate-200">
+              <button
+                onClick={() => setViewMode('3d')}
+                className={`px-4 py-1.5 text-sm font-semibold rounded-lg transition-all ${viewMode === '3d' ? 'bg-slate-900 text-white shadow' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'}`}
+              >
+                3D View
+              </button>
+              <button
+                onClick={() => setViewMode('chart')}
+                className={`px-4 py-1.5 text-sm font-semibold rounded-lg transition-all ${viewMode === 'chart' ? 'bg-slate-900 text-white shadow' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'}`}
+              >
+                Growth Chart
+              </button>
+              <button
+                onClick={() => setViewMode('table')}
+                className={`px-4 py-1.5 text-sm font-semibold rounded-lg transition-all ${viewMode === 'table' ? 'bg-slate-900 text-white shadow' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'}`}
+              >
+                Table
+              </button>
+            </div>
+
+            <div className="flex-1 pt-16">
+              {viewMode === '3d' && (
+                <ErrorBoundary FallbackComponent={ErrorFallback}>
+                  <div className="absolute inset-0 pt-14">
+                    <CompoundInterest3D
+                      monthlyInvestment={monthlyInvestment}
+                      years={years}
+                      expectedReturn={expectedReturn}
+                    />
+                    
+                    {/* Legend overlay for 3D View */}
+                    <div className="absolute top-6 left-6 bg-white/80 backdrop-blur-md p-4 rounded-xl border border-slate-200 shadow-sm pointer-events-none">
+                      <p className="text-xs font-bold uppercase text-slate-500 mb-2">Legend</p>
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <div className="w-3 h-3 rounded-sm bg-brand-primary"></div>
+                        <span className="text-sm font-medium text-slate-700">Principal Invested</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-sm bg-brand-success"></div>
+                        <span className="text-sm font-medium text-slate-700">Interest Earned</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="absolute bottom-6 right-6 text-xs text-brand-text-tertiary font-medium bg-white/50 backdrop-blur-md px-3 py-1.5 rounded-full shadow-sm pointer-events-none z-10">
+                    Drag to rotate • Scroll to zoom
+                  </div>
+                </ErrorBoundary>
+              )}
+              
+              {viewMode === 'chart' && (
+                <div className="absolute inset-0 pt-16 p-4">
+                  <CompoundInterestChart monthlyInvestment={monthlyInvestment} years={years} expectedReturn={expectedReturn} />
+                </div>
+              )}
+              
+              {viewMode === 'table' && (
+                <div className="absolute inset-0 pt-16 p-4">
+                  <CompoundInterestTable monthlyInvestment={monthlyInvestment} years={years} expectedReturn={expectedReturn} />
+                </div>
+              )}
             </div>
           </Card>
         </div>

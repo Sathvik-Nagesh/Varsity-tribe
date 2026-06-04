@@ -6,8 +6,11 @@ import { Container } from '@/components/layout/Container';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-
 import dynamic from 'next/dynamic';
+import { IconCalculator, IconTrendingUp, IconArrowLeft, IconInfoCircle } from '@tabler/icons-react';
+import { useUserStore } from '@/stores/useUserStore';
+import Link from 'next/link';
+import { formatCurrency } from '@/lib/formatCurrency';
 
 const LineChart = dynamic(() => import('recharts').then((mod) => mod.LineChart), { ssr: false });
 const Line = dynamic(() => import('recharts').then((mod) => mod.Line), { ssr: false });
@@ -16,44 +19,56 @@ const YAxis = dynamic(() => import('recharts').then((mod) => mod.YAxis), { ssr: 
 const CartesianGrid = dynamic(() => import('recharts').then((mod) => mod.CartesianGrid), { ssr: false });
 const Tooltip = dynamic(() => import('recharts').then((mod) => mod.Tooltip), { ssr: false });
 const ResponsiveContainer = dynamic(() => import('recharts').then((mod) => mod.ResponsiveContainer), { ssr: false });
-import { IconCalculator, IconTrendingUp, IconArrowLeft } from '@tabler/icons-react';
-import { useUserStore } from '@/stores/useUserStore';
-import Link from 'next/link';
-import { formatCurrency } from '@/lib/formatCurrency';
+const Legend = dynamic(() => import('recharts').then((mod) => mod.Legend), { ssr: false });
 
 interface DataPoint {
   age: number;
   year: number;
-  netWorth: number;
+  currentHabits: number;
+  targetHabits: number;
 }
 
 export default function FutureYouPage() {
   const [age, setAge] = useState<number>(25);
-  const [salary, setSalary] = useState<number>(60000);
-  const [expenses, setExpenses] = useState<number>(40000);
-  const [savings, setSavings] = useState<number>(10000);
-  const [returnRate, setReturnRate] = useState<number>(7);
+  const [currentSavings, setCurrentSavings] = useState<number>(100000);
+  const [currentMonthly, setCurrentMonthly] = useState<number>(5000);
+  const [targetMonthly, setTargetMonthly] = useState<number>(15000);
+  const [returnRate, setReturnRate] = useState<number>(10);
 
   const { currency } = useUserStore();
-
   const [chartData, setChartData] = useState<DataPoint[]>([]);
   const [hasCalculated, setHasCalculated] = useState(false);
 
   const calculateFuture = () => {
-    let currentNetWorth = savings;
-    const annualSavings = salary - expenses;
-    const rate = returnRate / 100;
+    let currentNW1 = currentSavings;
+    let currentNW2 = currentSavings;
+    const rate = returnRate / 100 / 12; // monthly rate
     
     const data: DataPoint[] = [];
     
-    for (let i = 0; i <= 30; i++) {
-      data.push({
-        year: i,
-        age: age + i,
-        netWorth: Math.round(currentNetWorth)
-      });
+    for (let year = 0; year <= 30; year++) {
+      if (year === 0) {
+        data.push({
+          year: 0,
+          age: age,
+          currentHabits: Math.round(currentSavings),
+          targetHabits: Math.round(currentSavings)
+        });
+        continue;
+      }
       
-      currentNetWorth = currentNetWorth * (1 + rate) + annualSavings;
+      // Calculate for 12 months
+      for (let m = 0; m < 12; m++) {
+        currentNW1 = currentNW1 * (1 + rate) + currentMonthly;
+        currentNW2 = currentNW2 * (1 + rate) + targetMonthly;
+      }
+      
+      data.push({
+        year,
+        age: age + year,
+        currentHabits: Math.round(currentNW1),
+        targetHabits: Math.round(currentNW2)
+      });
     }
     
     setChartData(data);
@@ -72,14 +87,14 @@ export default function FutureYouPage() {
         angle: 60,
         spread: 55,
         origin: { x: 0 },
-        colors: ['#10B981', '#34D399', '#059669']
+        colors: ['#10B981', '#3B82F6', '#6366f1']
       });
       confetti({
         particleCount: 4,
         angle: 120,
         spread: 55,
         origin: { x: 1 },
-        colors: ['#10B981', '#34D399', '#059669']
+        colors: ['#10B981', '#3B82F6', '#6366f1']
       });
 
       if (Date.now() < end) {
@@ -89,6 +104,36 @@ export default function FutureYouPage() {
     frame();
   };
 
+  const getDifferenceInsights = () => {
+    if (!hasCalculated || chartData.length === 0) return null;
+    const finalYear = chartData[chartData.length - 1];
+    const diff = finalYear.targetHabits - finalYear.currentHabits;
+    return (
+      <div className="mt-6 bg-brand-primary/10 rounded-xl p-6 border border-brand-primary/20">
+        <h4 className="text-h5 font-semibold text-brand-primary mb-2 flex items-center gap-2">
+          <IconInfoCircle size={20} />
+          Lifestyle Impact
+        </h4>
+        <p className="text-body text-brand-text-primary mb-4">
+          By saving an extra <strong>{formatCurrency(targetMonthly - currentMonthly, currency)}</strong> per month, you will have an additional <strong>{formatCurrency(diff, currency)}</strong> in 30 years.
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="bg-brand-surface border border-brand-border rounded-lg p-4">
+            <span className="text-2xl mb-2 block">🏖️</span>
+            <p className="text-sm text-brand-text-secondary">Extra luxury vacations every year</p>
+          </div>
+          <div className="bg-brand-surface border border-brand-border rounded-lg p-4">
+            <span className="text-2xl mb-2 block">🏡</span>
+            <p className="text-sm text-brand-text-secondary">A fully paid off dream home</p>
+          </div>
+          <div className="bg-brand-surface border border-brand-border rounded-lg p-4">
+            <span className="text-2xl mb-2 block">⏳</span>
+            <p className="text-sm text-brand-text-secondary">Option to retire 5-10 years earlier</p>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <PageLayout>
@@ -101,7 +146,7 @@ export default function FutureYouPage() {
         <div className="mb-8 flex flex-col items-center text-center">
           <h1 className="text-h2 font-bold mb-4 text-brand-text-primary">Future You Simulator</h1>
           <p className="text-body text-brand-text-secondary max-w-2xl">
-            Peek into your financial future. Enter your details below to see how your net worth could grow over the next 30 years through the power of compound interest.
+            Compare your current savings habits with a target goal to see the projected impact on your lifestyle and net worth over 30 years.
           </p>
         </div>
 
@@ -116,22 +161,22 @@ export default function FutureYouPage() {
               onChange={(e) => setAge(Number(e.target.value))}
             />
             <Input
-              label="Annual Salary"
+              label="Current Accumulated Savings"
               type="number"
-              value={salary}
-              onChange={(e) => setSalary(Number(e.target.value))}
+              value={currentSavings}
+              onChange={(e) => setCurrentSavings(Number(e.target.value))}
             />
             <Input
-              label="Annual Expenses"
+              label="Current Monthly Savings"
               type="number"
-              value={expenses}
-              onChange={(e) => setExpenses(Number(e.target.value))}
+              value={currentMonthly}
+              onChange={(e) => setCurrentMonthly(Number(e.target.value))}
             />
             <Input
-              label="Current Savings"
+              label="Target Monthly Savings"
               type="number"
-              value={savings}
-              onChange={(e) => setSavings(Number(e.target.value))}
+              value={targetMonthly}
+              onChange={(e) => setTargetMonthly(Number(e.target.value))}
             />
             <Input
               label="Expected Annual Return (%)"
@@ -149,27 +194,15 @@ export default function FutureYouPage() {
 
           <Card variant="elevated" className="col-span-1 lg:col-span-2 flex flex-col">
             <div className="flex items-center gap-2 mb-6 text-brand-text-primary">
-              <IconTrendingUp className="text-[#10B981]" />
+              <IconTrendingUp className="text-brand-primary" />
               <h3 className="text-h4 font-semibold">30-Year Projection</h3>
             </div>
 
             {hasCalculated ? (
               <>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                  {[5, 10, 20, 30].map(years => {
-                    const dataPoint = chartData.find(d => d.year === years);
-                    return (
-                      <div key={years} className="bg-brand-surface border border-brand-border rounded-xl p-4 text-center">
-                        <p className="text-small text-brand-text-secondary mb-1">In {years} Years</p>
-                        <p className="font-bold text-brand-primary text-lg">{dataPoint ? formatCurrency(dataPoint.netWorth, currency) : formatCurrency(0, currency)}</p>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                <div className="w-full h-full min-h-[400px] min-w-0">
+                <div className="w-full h-full min-h-[350px] min-w-0">
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={chartData} margin={{ top: 5, right: 20, bottom: 5, left: 20 }}>
+                    <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
                       <XAxis 
                         dataKey="age" 
@@ -185,21 +218,36 @@ export default function FutureYouPage() {
                         tickMargin={10}
                       />
                       <Tooltip 
-                        formatter={(value: any) => [formatCurrency(Number(value) || 0, currency), "Net Worth"]}
+                        formatter={(value: any, name: any) => [
+                          formatCurrency(Number(value) || 0, currency), 
+                          String(name) === "currentHabits" ? "Current Habit" : "Target Habit"
+                        ]}
                         labelFormatter={(label) => `Age: ${label}`}
                         contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                       />
+                      <Legend verticalAlign="top" height={36}/>
                       <Line 
+                        name="Current Habit"
                         type="monotone" 
-                        dataKey="netWorth" 
-                        stroke="#10B981" 
+                        dataKey="currentHabits" 
+                        stroke="#6B7280" 
                         strokeWidth={3}
                         dot={false}
-                        activeDot={{ r: 6, fill: "#10B981" }}
+                        activeDot={{ r: 6, fill: "#6B7280" }}
+                      />
+                      <Line 
+                        name="Target Habit"
+                        type="monotone" 
+                        dataKey="targetHabits" 
+                        stroke="#3B82F6" 
+                        strokeWidth={3}
+                        dot={false}
+                        activeDot={{ r: 6, fill: "#3B82F6" }}
                       />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
+                {getDifferenceInsights()}
               </>
             ) : (
               <div className="flex-1 flex flex-col items-center justify-center text-brand-text-tertiary">

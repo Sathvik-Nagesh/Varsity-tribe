@@ -10,14 +10,11 @@ import {
   useMotionValueEvent,
 } from 'framer-motion';
 import {
-  IconSun,
-  IconMoon,
   IconMenu2,
   IconX,
 } from '@tabler/icons-react';
 import { cn } from '@/lib/cn';
 import { Button } from '@/components/ui';
-import { useThemeStore } from '@/stores/useThemeStore';
 
 /* ── Nav links ── */
 
@@ -35,19 +32,11 @@ export function LandingNavbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const { theme, setTheme } = useThemeStore();
-  const resolvedTheme = useThemeStore((s) => s.resolvedTheme);
-  const isDark = resolvedTheme() === 'dark';
-
   const { scrollY } = useScroll();
 
   useMotionValueEvent(scrollY, 'change', (latest) => {
     setScrolled(latest > 10);
   });
-
-  const toggleTheme = () => {
-    setTheme(isDark ? 'light' : 'dark');
-  };
 
   return (
     <>
@@ -92,14 +81,7 @@ export function LandingNavbar() {
 
           {/* Right — Actions */}
           <div className="flex items-center gap-2">
-            {/* Dark mode toggle */}
-            <button
-              onClick={toggleTheme}
-              className="inline-flex items-center justify-center h-9 w-9 rounded-lg text-brand-text-secondary hover:text-brand-text-primary hover:bg-brand-surface-elevated transition-colors cursor-pointer"
-              aria-label="Toggle dark mode"
-            >
-              {isDark ? <IconSun size={20} /> : <IconMoon size={20} />}
-            </button>
+
 
             {/* Get Started — desktop */}
             <Link href="/onboarding" className="hidden md:block">

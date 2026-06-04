@@ -8,6 +8,7 @@ import { Card, Button, Badge } from '@/components/ui';
 import { cn } from '@/lib/cn';
 import { useUserStore } from '@/stores/useUserStore';
 import { PageLayout } from "@/components/layout/PageLayout";
+import { Container } from "@/components/layout/Container";
 
 export default function SimulationPage() {
   const params = useParams();
@@ -55,18 +56,48 @@ export default function SimulationPage() {
     router.push('/learn');
   };
 
-  if (!isSalaryNegotiation) {
+   if (!isSalaryNegotiation) {
+    const formattedTitle = slug ? slug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') : 'Simulation';
+
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-4">
-        <div className="text-6xl mb-4">🚧</div>
-        <h1 className="text-h4 font-display">Simulation Coming Soon</h1>
-        <p className="text-brand-text-secondary max-w-md">
-          The {slug?.replace('-', ' ')} simulation is currently under development. Check back later!
-        </p>
-        <Button onClick={() => router.push('/learn')} icon={<IconArrowLeft size={16} />}>
-          Back to Hub
-        </Button>
-      </div>
+      <PageLayout>
+        <div className="max-w-3xl mx-auto pb-24">
+          <div className="flex items-center gap-4 mb-[var(--spacing-lg)] mt-8 px-4">
+            <button 
+              onClick={() => router.push('/learn')}
+              className="p-2 hover:bg-brand-surface-elevated rounded-full transition-colors text-brand-text-secondary"
+            >
+              <IconArrowLeft size={24} />
+            </button>
+            <div>
+              <h1 className="text-h5 font-display">{formattedTitle}</h1>
+              <p className="text-small text-brand-text-secondary">Interactive Calculator</p>
+            </div>
+          </div>
+
+          <Container>
+            <Card className="p-8">
+              <h2 className="text-h4 mb-4">Basic Calculator</h2>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Input Value (₹)</label>
+                  <input type="number" className="w-full p-2 border border-brand-border bg-brand-surface rounded text-brand-text-primary" defaultValue={50000} />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Factor (%)</label>
+                  <input type="number" className="w-full p-2 border border-brand-border bg-brand-surface rounded text-brand-text-primary" defaultValue={10} />
+                </div>
+                <Button onClick={() => alert('Calculated!')} variant="primary" className="w-full mt-4">
+                  Calculate
+                </Button>
+                <p className="text-xs text-brand-text-tertiary text-center mt-4">
+                  This is a barebones functional calculator for {formattedTitle}.
+                </p>
+              </div>
+            </Card>
+          </Container>
+        </div>
+      </PageLayout>
     );
   }
 

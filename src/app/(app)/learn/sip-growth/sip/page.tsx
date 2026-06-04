@@ -174,7 +174,7 @@ export default function SIPCalculatorPage() {
                 <h3 className="text-sm font-medium mb-6">Investment Growth Over Time</h3>
                 <div className="w-full h-full min-h-[400px] min-w-0">
                   <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                    <AreaChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                       <defs>
                         <linearGradient id="colorInvested" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="var(--color-primary, #6366f1)" stopOpacity={0.3}/>

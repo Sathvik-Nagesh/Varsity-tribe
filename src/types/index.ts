@@ -208,10 +208,10 @@ export interface LevelInfo {
 
 export const USER_LEVELS: LevelInfo[] = [
   { level: 1, name: 'Explorer', minXP: 0, icon: '🌱' },
-  { level: 2, name: 'Saver', minXP: 500, icon: '💰' },
+  { level: 2, name: 'Saver', minXP: 500, icon: '🌿' },
   { level: 3, name: 'Investor', minXP: 1500, icon: '📈' },
-  { level: 4, name: 'Wealth Builder', minXP: 4000, icon: '🏗️' },
-  { level: 5, name: 'Financial Mentor', minXP: 10000, icon: '👑' },
+  { level: 4, name: 'Builder', minXP: 4000, icon: '🏗️' },
+  { level: 5, name: 'Mentor', minXP: 10000, icon: '🎓' },
 ];
 
 /* ── Learning ── */

@@ -11,6 +11,7 @@ import { cn } from '@/lib/cn';
 
 import { useUserStore } from '@/stores/useUserStore';
 import { formatCurrency } from '@/lib/formatCurrency';
+import Link from 'next/link';
 
 interface ToolCard {
   icon: any;
@@ -18,6 +19,7 @@ interface ToolCard {
   iconColor: string;
   title: string;
   preview: React.ReactNode;
+  href: string;
 }
 
 function SIPPreview() {
@@ -124,15 +126,9 @@ const tools: ToolCard[] = [
     icon: IconCalculator,
     iconBg: 'bg-brand-primary/10',
     iconColor: 'text-brand-primary',
-    title: 'SIP Calculator',
+    title: 'SIP Growth',
     preview: <SIPPreview />,
-  },
-  {
-    icon: IconReceipt,
-    iconBg: 'bg-amber-500/10',
-    iconColor: 'text-amber-500',
-    title: 'EMI Calculator',
-    preview: <EMIPreview />,
+    href: '/learn/sip-growth',
   },
   {
     icon: IconSunHigh,
@@ -140,6 +136,15 @@ const tools: ToolCard[] = [
     iconColor: 'text-brand-success',
     title: 'Retirement Planner',
     preview: <RetirementPreview />,
+    href: '/learn/retirement-planner',
+  },
+  {
+    icon: IconReceipt,
+    iconBg: 'bg-amber-500/10',
+    iconColor: 'text-amber-500',
+    title: 'Emergency Fund',
+    preview: <EMIPreview />, // I'll keep the same preview for now
+    href: '/learn/emergency-fund',
   },
   {
     icon: IconChartPie,
@@ -147,6 +152,7 @@ const tools: ToolCard[] = [
     iconColor: 'text-purple-500',
     title: 'Portfolio Check',
     preview: <PortfolioPreview />,
+    href: '/tools/portfolio',
   },
 ];
 
@@ -175,36 +181,37 @@ export function ToolsHub() {
         {/* Tool Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {tools.map((tool, i) => (
-            <motion.div
-              key={tool.title}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-40px' }}
-              transition={{ duration: 0.5, delay: i * 0.1, ease: 'easeOut' }}
-              whileHover={{ y: -4 }}
-              className="glass-strong rounded-2xl p-5 flex flex-col cursor-default"
-            >
-              {/* Icon */}
-              <div
-                className={cn(
-                  'w-10 h-10 rounded-xl flex items-center justify-center',
-                  tool.iconBg
-                )}
+            <Link key={tool.title} href={tool.href}>
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-40px' }}
+                transition={{ duration: 0.5, delay: i * 0.1, ease: 'easeOut' }}
+                whileHover={{ scale: 1.05, boxShadow: '0 0 20px rgba(56, 126, 209, 0.4)' }}
+                className="glass-strong rounded-2xl p-5 flex flex-col cursor-pointer h-full hover:border-brand-primary/50 transition-colors"
               >
-                <tool.icon size={20} className={tool.iconColor} />
-              </div>
+                {/* Icon */}
+                <div
+                  className={cn(
+                    'w-10 h-10 rounded-xl flex items-center justify-center',
+                    tool.iconBg
+                  )}
+                >
+                  <tool.icon size={20} className={tool.iconColor} />
+                </div>
 
-              {/* Title */}
-              <h3 className="text-sm font-semibold mt-3">{tool.title}</h3>
+                {/* Title */}
+                <h3 className="text-sm font-semibold mt-3">{tool.title}</h3>
 
-              {/* Mini Preview */}
-              {tool.preview}
+                {/* Mini Preview */}
+                {tool.preview}
 
-              {/* CTA */}
-              <span className="text-brand-primary text-xs font-medium mt-auto pt-3">
-                Try it →
-              </span>
-            </motion.div>
+                {/* CTA */}
+                <span className="text-brand-primary text-xs font-medium mt-auto pt-3">
+                  Try it →
+                </span>
+              </motion.div>
+            </Link>
           ))}
         </div>
       </div>

@@ -167,7 +167,7 @@ export default function EMICalculatorPage() {
                 <h3 className="text-sm font-medium w-full mb-2">Breakup of Total Payment</h3>
                 <div className="w-full h-full min-h-[400px] min-w-0">
                   <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
+                    <PieChart margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                       <Pie
                         data={chartData}
                         cx="50%"

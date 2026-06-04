@@ -164,13 +164,7 @@ export default function LeaderboardPage() {
   return (
     <PageLayout>
         <Container >
-          <div className="pt-6 pb-2">
-            <Link href="/dashboard" className="text-brand-text-secondary hover:text-brand-primary flex items-center gap-2 font-medium text-sm transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12l14 0" /><path d="M5 12l6 6" /><path d="M5 12l6 -6" /></svg>
-              Back to Dashboard
-            </Link>
-          </div>
-          <div className="space-y-[var(--space-xl)] pb-12 w-full max-w-5xl mx-auto px-4 sm:px-6">
+          <div className="space-y-[var(--space-xl)] pb-12 pt-8 w-full max-w-5xl mx-auto px-4 sm:px-6">
             {/* Header */}
             <section className="text-center pb-[var(--space-lg)]">
               <IconTrophy size={48} className="mx-auto text-brand-warning mb-4" />
