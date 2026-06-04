@@ -164,41 +164,12 @@ export default function SalaryNegotiationPage() {
   
   const endRef = useRef<HTMLDivElement>(null);
 
-  const triggerConfetti = async () => {
-    const confetti = (await import('canvas-confetti')).default;
-    const duration = 3 * 1000;
-    const end = Date.now() + duration;
-
-    const frame = () => {
-      confetti({
-        particleCount: 5,
-        angle: 60,
-        spread: 55,
-        origin: { x: 0 },
-        colors: ['#2563EB', '#60A5FA', '#FCD34D']
-      });
-      confetti({
-        particleCount: 5,
-        angle: 120,
-        spread: 55,
-        origin: { x: 1 },
-        colors: ['#2563EB', '#60A5FA', '#FCD34D']
-      });
-
-      if (Date.now() < end) {
-        requestAnimationFrame(frame);
-      }
-    };
-    frame();
-  };
-
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
   useEffect(() => {
     if (dialogueTree[currentStepId].isEnd && currentOffer > 0) {
-      triggerConfetti();
       addXP(score);
     }
   }, [currentStepId]);

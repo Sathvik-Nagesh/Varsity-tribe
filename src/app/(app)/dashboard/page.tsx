@@ -343,7 +343,7 @@ export default function DashboardPage() {
     () => false,
   );
 
-  const { onboardingCompleted, xp, streak, currency } = useUserStore();
+  const { onboardingCompleted, xp, streak, currency, financialHealthScore } = useUserStore();
   const personaTrack = useUserStore(selectPersonaTrack);
   const level = useUserStore(selectLevel);
   const recommendedActions = useUserStore(useShallow(selectRecommendedActions));
@@ -380,244 +380,252 @@ export default function DashboardPage() {
           transition={{ duration: 0.3 }}
           className="space-y-8 pb-4"
         >
-          {/* ═══ A. Greeting Header & Health Score ═══ */}
+          {/* ═══ 1. Header / Greeting ═══ */}
           <Section delay={0}>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Welcome & Stats */}
-              <div className="lg:col-span-2 space-y-6">
-                <div className="flex flex-wrap items-start justify-between gap-4">
-                  <div className="space-y-1">
-                    <h1 className="text-h1">Good Morning, Sathvik 👋</h1>
-                    <p className="text-body text-brand-text-secondary mt-1">Ready to continue your financial journey?</p>
-                    <div className="mt-2">
-                      <Badge variant="primary" size="md">
-                        {formatTrackLabel(level)} • Level {Math.floor(xp / 500) + 1}
-                      </Badge>
-                    </div>
-                  </div>
-                  <div className="flex flex-col items-end gap-1">
-                    <span className="text-h3 font-mono text-brand-primary">{xp} XP</span>
-                    <span className="text-small text-brand-text-secondary">🔥 {streak} day streak</span>
+            <div className="space-y-6">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div className="space-y-1">
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 tracking-tight">
+                    {greeting}, Sathvik 👋
+                  </h1>
+                  <p className="text-body text-brand-text-secondary mt-1">Ready to continue your financial journey?</p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <Badge variant="primary" size="md">
+                      {formatTrackLabel(level)} • Level {Math.floor(xp / 500) + 1}
+                    </Badge>
                   </div>
                 </div>
-                
-                {/* ═══ B. Smart Nudge Banner ═══ */}
-                <AnimatePresence>
-                  {!nudgeDismissed && (
-                    <motion.div
-                      layout
-                      exit={{ opacity: 0, height: 0, marginTop: 0, marginBottom: 0, padding: 0 }}
-                      transition={{ duration: 0.25 }}
-                      className="flex items-start gap-3 rounded-[var(--radius-md)] border-l-4 border-brand-primary bg-brand-primary/5 p-4"
+              </div>
+              
+              <AnimatePresence>
+                {!nudgeDismissed && (
+                  <motion.div
+                    layout
+                    exit={{ opacity: 0, height: 0, marginTop: 0, marginBottom: 0, padding: 0 }}
+                    transition={{ duration: 0.25 }}
+                    className="flex items-start gap-3 rounded-[var(--radius-md)] border-l-4 border-brand-primary bg-brand-primary/5 p-4"
+                  >
+                    <IconBulb className="mt-0.5 shrink-0 text-brand-primary" size={20} />
+                    <p className="text-body text-brand-text-primary flex-1">{nudgeMessage}</p>
+                    <button
+                      onClick={() => setNudgeDismissed(true)}
+                      className="shrink-0 rounded-[var(--radius-sm)] p-1 text-brand-text-tertiary hover:bg-brand-surface-elevated hover:text-brand-text-primary transition-colors"
+                      aria-label="Dismiss nudge"
                     >
-                      <IconBulb className="mt-0.5 shrink-0 text-brand-primary" size={20} />
-                      <p className="text-body text-brand-text-primary flex-1">{nudgeMessage}</p>
-                      <button
-                        onClick={() => setNudgeDismissed(true)}
-                        className="shrink-0 rounded-[var(--radius-sm)] p-1 text-brand-text-tertiary hover:bg-brand-surface-elevated hover:text-brand-text-primary transition-colors"
-                        aria-label="Dismiss nudge"
-                      >
-                        <IconX size={16} />
-                      </button>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
-              {/* Financial Health Score */}
-              <div className="lg:col-span-1">
-                <Card variant="elevated" className="p-5 flex flex-col h-full justify-center">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-h3">Financial Health</h3>
-                    <IconShield size={24} className="text-brand-success" />
-                  </div>
-                  <div className="flex items-end gap-2">
-                    <span className="text-[2.5rem] font-bold leading-none text-brand-success">742</span>
-                    <span className="text-body text-brand-text-tertiary mb-1">/ 1000</span>
-                  </div>
-                  <p className="text-small text-brand-text-secondary mt-2">Your financial foundation is looking strong!</p>
-                  <ProgressBar value={74.2} max={100} color="success" size="sm" className="mt-4" />
-                </Card>
-              </div>
+                      <IconX size={16} />
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </Section>
 
-          {/* ═══ B. Continue Learning & Live Activity ═══ */}
+          {/* ═══ Main Dashboard Grid ═══ */}
           <Section delay={0.05}>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 space-y-4">
-                <h2 className="text-h2">Continue Learning</h2>
-                <Card variant="elevated" className="p-6">
-                  <div className="flex flex-col sm:flex-row items-center gap-6">
-                    <div className="w-16 h-16 rounded-full bg-brand-primary/10 flex items-center justify-center shrink-0">
-                      <IconSchool size={32} className="text-brand-primary" />
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+              
+              {/* ─── ROW 1 ─── */}
+              
+              {/* Continue Learning */}
+              <div className="lg:col-span-2 space-y-3">
+                <h2 className="text-h3 font-semibold text-brand-text-primary">Continue Learning</h2>
+                <Card variant="elevated" className="p-4 flex flex-col justify-center rounded-[var(--radius-lg)] shadow-sm">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-brand-primary/10 flex items-center justify-center shrink-0">
+                      <IconSchool size={20} className="text-brand-primary" />
                     </div>
-                    <div className="flex-1 w-full space-y-2">
+                    <div className="flex-1 space-y-1.5 min-w-0">
                       <div className="flex items-center justify-between">
-                        <h3 className="text-h3">Investing 101</h3>
-                        <span className="text-small font-medium text-brand-primary">75% Complete</span>
+                        <h3 className="text-sm font-semibold text-brand-text-primary truncate pr-2">Investing 101</h3>
+                        <span className="text-xs font-bold text-brand-primary shrink-0">75% Complete</span>
                       </div>
-                      <ProgressBar value={75} max={100} color="primary" size="md" />
-                      <p className="text-small text-brand-text-secondary mt-1">
-                        Next up: Understanding the power of compounding.
+                      <ProgressBar value={75} max={100} color="primary" size="sm" />
+                      <p className="text-xs text-brand-text-secondary truncate">
+                        Next: Power of compounding.
                       </p>
                     </div>
-                    <Button variant="primary" className="w-full sm:w-auto">
+                    <Button variant="primary" size="sm" className="shrink-0">
                       Resume
                     </Button>
                   </div>
                 </Card>
               </div>
 
-              <div className="lg:col-span-1 space-y-4">
-                <h2 className="text-h2">Live Activity Feed</h2>
-                <Card variant="default" className="p-4 h-[120px] overflow-y-auto">
-                  <LiveActivitiesList activities={[
-                    { id: 1, user: 'Priya', action: 'completed Investing 101', time: 'just now' },
-                    { id: 2, user: 'Rahul', action: 'started SIP in Index Funds', time: '5m ago' },
-                    { id: 3, user: 'Anjali', action: 'earned "Debt Free" badge', time: '12m ago' }
-                  ]} />
-                </Card>
-              </div>
-            </div>
-          </Section>
-
-          {/* ═══ C. Goals Section ═══ */}
-          <Section delay={0.1}>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-h2">Your Goals</h2>
-                <Button variant="secondary" size="sm" icon={<IconPlus size={16} />}>
-                  Add Goal
-                </Button>
-              </div>
-
-              {goals.length === 0 ? (
-                <Card variant="default" className="p-8 text-center">
-                  <p className="text-body text-brand-text-secondary">
-                    No goals yet. Add your first goal to get started!
+              {/* XP Widget */}
+              <div className="lg:col-span-1 space-y-3">
+                <h2 className="text-h3 font-semibold text-brand-text-primary">Experience</h2>
+                <Card variant="elevated" className="p-4 flex flex-col justify-center rounded-[var(--radius-lg)] shadow-sm">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xl font-bold text-brand-primary">{xp.toLocaleString()} XP</span>
+                    <IconTrophy size={20} className="text-brand-primary" />
+                  </div>
+                  <ProgressBar value={xp % 500} max={500} color="primary" size="sm" />
+                  <p className="text-xs text-brand-text-secondary mt-2">
+                    {500 - (xp % 500)} XP to Next Level
                   </p>
                 </Card>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {goals.map((goal) => {
-                    const GoalIcon = goalIconMap[goal.type] as any;
-                    const progress = (goal.currentAmount / goal.targetAmount) * 100;
-                    const progressColor = getProgressColor(progress);
+              </div>
 
-                    return (
-                      <Card key={goal.id} variant="elevated" className="p-5">
-                        <div className="space-y-4">
-                          {/* Icon + Label */}
-                          <div className="flex items-center gap-3">
-                            <div
-                              className={cn(
-                                'flex h-10 w-10 items-center justify-center rounded-full',
-                                goalColorMap[goal.type]
-                              )}
-                            >
-                              <GoalIcon size={20} />
-                            </div>
-                            <h3 className="text-h3">{goal.label}</h3>
-                          </div>
+              {/* Streak Widget */}
+              <div className="lg:col-span-1 space-y-3">
+                <h2 className="text-h3 font-semibold text-brand-text-primary">Streak</h2>
+                <Card variant="elevated" className="p-4 flex flex-col justify-center rounded-[var(--radius-lg)] shadow-sm">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xl font-bold text-orange-500">{streak} Days</span>
+                    <span className="text-xl">🔥</span>
+                  </div>
+                  <p className="text-xs text-brand-text-secondary mt-2">
+                    You're on fire! Keep it up.
+                  </p>
+                </Card>
+              </div>
 
-                          {/* Progress */}
-                          <ProgressBar
-                            value={goal.currentAmount}
-                            max={goal.targetAmount}
-                            color={progressColor}
-                            size="md"
-                          />
-
-                          {/* Amount */}
-                          <p className="text-small text-brand-text-secondary">
-                            {formatCurrency(goal.currentAmount, currency)}{' '}
-                            <span className="text-brand-text-tertiary">
-                              of {formatCurrency(goal.targetAmount, currency)}
-                            </span>
-                          </p>
-
-                          {/* SIP + projected date */}
-                          <div className="flex items-center justify-between text-small text-brand-text-tertiary">
-                            <span>SIP: {formatCurrency(goal.monthlySIP, currency)}/mo</span>
-                            <span>
-                              Target:{' '}
-                              {new Date(goal.projectedCompletionDate).toLocaleDateString('en-IN', {
-                                month: 'short',
-                                year: 'numeric',
-                              })}
-                            </span>
-                          </div>
-
-                          {/* Milestone dots */}
-                          <div className="flex items-center gap-2">
-                            {goal.milestones.map((ms, i) => (
-                              <div key={i} className="flex items-center gap-1.5">
-                                <div
-                                  className={cn(
-                                    'h-2.5 w-2.5 rounded-full transition-colors',
-                                    ms.reached
-                                      ? 'bg-brand-success'
-                                      : 'bg-brand-border'
-                                  )}
-                                />
-                                <span className="text-[10px] text-brand-text-tertiary">
-                                  {ms.percent}%
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </Card>
-                    );
-                  })}
+              {/* ─── ROW 2 ─── */}
+              
+              {/* Goals Overview */}
+              <div className="lg:col-span-3 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-h3 font-semibold text-brand-text-primary">Goals Overview</h2>
+                  <Button variant="secondary" size="sm" className="h-7 text-xs px-2" icon={<IconPlus size={14} />}>
+                    Add Goal
+                  </Button>
                 </div>
-              )}
-            </div>
-          </Section>
+                {goals.length === 0 ? (
+                  <Card variant="default" className="p-4 text-center rounded-[var(--radius-lg)] shadow-sm">
+                    <p className="text-sm text-brand-text-secondary">
+                      No goals yet. Add your first goal to get started!
+                    </p>
+                  </Card>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {goals.slice(0, 3).map((goal) => {
+                      const GoalIcon = goalIconMap[goal.type] as any;
+                      const progress = (goal.currentAmount / goal.targetAmount) * 100;
+                      const progressColor = getProgressColor(progress);
 
-          {/* ═══ D. Recommended Actions ═══ */}
-          <Section delay={0.15}>
-            <div className="space-y-4">
-              <h2 className="text-h2">Recommended for You</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {recommendedActions.slice(0, 3).map((action, i) => (
-                  <Card key={i} hoverable className="p-4">
-                    <div className="flex items-start gap-3">
-                      <IconCircleCheck
-                        size={20}
-                        className="mt-0.5 shrink-0 text-brand-success"
-                      />
-                      <div className="flex-1 space-y-2">
-                        <p className="text-body text-brand-text-primary">{action}</p>
-                        <Button variant="primary" size="sm">
-                          Start
+                      return (
+                        <Card key={goal.id} variant="elevated" className="p-4 rounded-[var(--radius-lg)] shadow-sm flex flex-col">
+                          <div className="space-y-3 flex-1">
+                            <div className="flex items-center gap-3">
+                              <div
+                                className={cn(
+                                  'flex h-8 w-8 items-center justify-center rounded-full shrink-0',
+                                  goalColorMap[goal.type]
+                                )}
+                              >
+                                <GoalIcon size={16} />
+                              </div>
+                              <h3 className="text-sm font-semibold truncate" title={goal.label}>{goal.label}</h3>
+                            </div>
+                            
+                            <ProgressBar
+                              value={goal.currentAmount}
+                              max={goal.targetAmount}
+                              color={progressColor}
+                              size="sm"
+                            />
+                            
+                            <div className="flex items-baseline gap-1.5">
+                              <span className="text-sm font-bold text-brand-text-primary">
+                                {formatCurrency(goal.currentAmount, currency)}
+                              </span>
+                              <span className="text-xs font-semibold text-brand-text-tertiary">
+                                / {formatCurrency(goal.targetAmount, currency)}
+                              </span>
+                            </div>
+                            
+                            <div className="flex items-center justify-between text-[10px] text-brand-text-tertiary mt-auto pt-1">
+                              <span>SIP: {formatCurrency(goal.monthlySIP, currency)}</span>
+                              <span>
+                                {new Date(goal.projectedCompletionDate).toLocaleDateString('en-IN', {
+                                  month: 'short',
+                                  year: '2-digit',
+                                })}
+                              </span>
+                            </div>
+                          </div>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Financial Health */}
+              <div className="lg:col-span-1 space-y-3">
+                <h2 className="text-h3 font-semibold text-brand-text-primary">Financial Health</h2>
+                <Card variant="elevated" className="p-4 flex flex-col justify-center relative overflow-hidden rounded-[var(--radius-lg)] shadow-sm">
+                  <div className="absolute -top-4 -right-4 p-4 opacity-5">
+                    <IconShield size={80} />
+                  </div>
+                  <div className="relative z-10 flex flex-col h-full">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-xs font-semibold text-brand-text-secondary uppercase tracking-wider">Your Score</h3>
+                      <IconShield size={16} className="text-brand-success" />
+                    </div>
+                    <div className="flex items-baseline gap-1 mt-1">
+                      <span className="text-2xl font-bold text-brand-success">{financialHealthScore || 742}</span>
+                      <span className="text-xs font-bold text-brand-text-tertiary">/ 1000</span>
+                    </div>
+                    <ProgressBar value={(financialHealthScore || 742) / 10} max={100} color="success" size="sm" className="mt-3 mb-4" />
+                    
+                    <div className="flex items-center gap-2 text-xs pt-3 border-t border-brand-border mt-auto">
+                      <div className="flex items-center text-brand-success font-semibold bg-brand-success/10 px-1.5 py-0.5 rounded">
+                        <IconArrowUp size={12} className="mr-0.5" />
+                        Top 26%
+                      </div>
+                      <span className="text-brand-text-tertiary ml-auto truncate">Ahead of 74%</span>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+
+              {/* ─── ROW 3 ─── */}
+              
+              {/* Recommended Modules */}
+              <div className="lg:col-span-4 space-y-3">
+                <h2 className="text-h3 font-semibold text-brand-text-primary">Recommended Next Steps</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                  {recommendedActions.slice(0, 4).map((action, i) => (
+                    <Card key={i} hoverable className="p-3 rounded-[var(--radius-lg)] shadow-sm flex flex-col h-full">
+                      <div className="flex items-start gap-2 flex-1">
+                        <IconCircleCheck size={18} className="mt-0.5 shrink-0 text-brand-success" />
+                        <p className="text-xs font-medium text-brand-text-primary leading-tight mb-2">{action}</p>
+                      </div>
+                      <div className="mt-auto pt-2">
+                        <Button variant="secondary" size="sm" className="w-full text-[11px] h-7">
+                          Start Action
                         </Button>
                       </div>
-                    </div>
-                  </Card>
-                ))}
+                    </Card>
+                  ))}
+                </div>
               </div>
+
             </div>
           </Section>
 
-
-
-          {/* ═══ F. Quick Tools ═══ */}
-          <Section delay={0.25}>
+          {/* ═══ 6. Live Activity Feed ═══ */}
+          <Section delay={0.2}>
             <div className="space-y-4">
-              <h2 className="text-h2">Quick Tools</h2>
-              <QuickToolsList tools={tools} />
+              <h2 className="text-h2">Live Activity Feed</h2>
+              <Card variant="default" className="p-4 rounded-2xl">
+                <LiveActivitiesList activities={[
+                  { id: 1, user: 'Priya', action: 'completed Investing 101', time: 'just now' },
+                  { id: 2, user: 'Rahul', action: 'started SIP in Index Funds', time: '5m ago' },
+                  { id: 3, user: 'Anjali', action: 'earned "Debt Free" badge', time: '12m ago' }
+                ]} />
+              </Card>
             </div>
           </Section>
 
-          {/* ═══ G. Community Preview & Leaderboard ═══ */}
-          <Section delay={0.3}>
+          {/* ═══ 7. Community Activity & Leaderboard ═══ */}
+          <Section delay={0.25}>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Community */}
+              {/* Community Activity */}
               <div className="lg:col-span-2 space-y-4">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-h2">From the Community</h2>
+                  <h2 className="text-h2">Community Activity</h2>
                   <Link href="/community">
                     <Button variant="ghost" size="sm">View All</Button>
                   </Link>
@@ -628,19 +636,26 @@ export default function DashboardPage() {
               {/* Leaderboard */}
               <div className="lg:col-span-1 space-y-4">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-h2">Top Learners</h2>
+                  <h2 className="text-h2">Leaderboard</h2>
                   <Link href="/leaderboard">
                     <Button variant="ghost" size="sm">View All</Button>
                   </Link>
                 </div>
-                <Card variant="default" className="p-4">
+                <Card variant="default" className="p-4 rounded-2xl">
                   <TopLeadersList leaders={leaders} />
                 </Card>
               </div>
             </div>
           </Section>
+          
+          {/* ═══ Additional Tools & Events ═══ */}
+          <Section delay={0.3}>
+            <div className="space-y-4">
+              <h2 className="text-h2">Quick Tools</h2>
+              <QuickToolsList tools={tools} />
+            </div>
+          </Section>
 
-          {/* ═══ H. Upcoming Events ═══ */}
           <Section delay={0.35}>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -650,6 +665,7 @@ export default function DashboardPage() {
               <UpcomingEventsList events={events} />
             </div>
           </Section>
+
         </motion.div>
       </Container>
     </PageLayout>

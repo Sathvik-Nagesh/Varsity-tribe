@@ -6,7 +6,7 @@ interface PageLayoutProps {
 
 export const PageLayout: React.FC<PageLayoutProps> = ({ children }) => {
   return (
-    <div className="mt-6 min-h-[calc(100vh-96px)]">
+    <div className="pt-6 md:pt-8 min-h-[calc(100vh-96px)]">
       {children}
     </div>
   );

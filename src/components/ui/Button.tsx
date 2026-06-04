@@ -7,16 +7,16 @@ import { cn } from '@/lib/cn';
 /* ── Variant & Size Maps ── */
 
 const variantStyles = {
-  primary: 'bg-blue-600 !text-white shadow-sm hover:bg-blue-700 hover:shadow-md',
-  secondary: 'bg-white/50 backdrop-blur-lg text-brand-text-primary border border-slate-200 hover:bg-white/80 shadow-sm',
+  primary: 'bg-brand-primary !text-white shadow-sm hover:bg-brand-primary-hover hover:shadow-md',
+  secondary: 'bg-white text-brand-text-primary border border-slate-200 hover:bg-slate-50 shadow-sm',
   ghost: 'bg-transparent text-brand-text-primary hover:bg-slate-100',
-  danger: 'bg-red-600 !text-white shadow-sm hover:bg-red-700 hover:shadow-md',
+  danger: 'bg-brand-danger !text-white shadow-sm hover:bg-red-700 hover:shadow-md',
 } as const;
 
 const sizeStyles = {
-  sm: 'h-8 px-3 text-small gap-1.5 rounded-[var(--radius-sm)]',
-  md: 'h-10 px-4 text-body gap-2 rounded-[var(--radius-md)]',
-  lg: 'h-12 px-6 text-body gap-2.5 rounded-[var(--radius-md)]',
+  sm: 'h-8 px-3 text-small gap-1.5 rounded-lg',
+  md: 'h-10 px-4 text-body gap-2 rounded-xl',
+  lg: 'h-12 px-6 text-body gap-2.5 rounded-xl',
 } as const;
 
 /* ── Props ── */
@@ -59,17 +59,9 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         disabled={isDisabled}
         initial="initial"
-        animate={isDisabled ? 'disabled' : 'initial'}
-        whileHover={isDisabled ? undefined : 'hover'}
-        whileFocus={isDisabled ? undefined : 'focus'}
-        whileTap={isDisabled ? undefined : 'tap'}
-        variants={{
-          initial: { scale: 1, y: 0, opacity: 1 },
-          hover: { scale: 1.05, y: -2, transition: { duration: 0.15, ease: 'easeOut' } },
-          focus: { scale: 1.05, y: -2, transition: { duration: 0.15, ease: 'easeOut' } },
-          tap: { scale: 0.95, y: 0, transition: { duration: 0.1 } },
-          disabled: { scale: 1, y: 0, opacity: 0.5 },
-        }}
+        whileHover={isDisabled ? undefined : { scale: 1.02, y: -1 }}
+        whileTap={isDisabled ? undefined : { scale: 0.95 }}
+        transition={{ duration: 0.15 }}
         className={cn(
           /* base */
           'inline-flex cursor-pointer items-center justify-center font-medium',
@@ -79,7 +71,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           variantStyles[variant],
           sizeStyles[size],
           /* disabled */
-          isDisabled && 'pointer-events-none',
+          isDisabled && 'pointer-events-none opacity-50',
           className
         )}
         {...rest}

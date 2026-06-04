@@ -73,35 +73,6 @@ export default function FutureYouPage() {
     
     setChartData(data);
     setHasCalculated(true);
-    triggerConfetti();
-  };
-
-  const triggerConfetti = async () => {
-    const confetti = (await import('canvas-confetti')).default;
-    const duration = 2 * 1000;
-    const end = Date.now() + duration;
-
-    const frame = () => {
-      confetti({
-        particleCount: 4,
-        angle: 60,
-        spread: 55,
-        origin: { x: 0 },
-        colors: ['#10B981', '#3B82F6', '#6366f1']
-      });
-      confetti({
-        particleCount: 4,
-        angle: 120,
-        spread: 55,
-        origin: { x: 1 },
-        colors: ['#10B981', '#3B82F6', '#6366f1']
-      });
-
-      if (Date.now() < end) {
-        requestAnimationFrame(frame);
-      }
-    };
-    frame();
   };
 
   const getDifferenceInsights = () => {

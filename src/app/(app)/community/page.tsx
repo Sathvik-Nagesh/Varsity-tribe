@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useCommunityStore } from '@/stores/useCommunityStore';
 import { 
@@ -11,18 +11,40 @@ import {
   IconBookmark,
   IconPlus,
   IconTrendingUp,
-  IconUsers
+  IconUsers,
+  IconX,
+  IconSparkles
 } from '@tabler/icons-react';
 import Link from 'next/link';
 import { Container } from '@/components/layout/Container';
 import { PageLayout } from "@/components/layout/PageLayout";
+import { TopicChip } from '@/components/discover/TopicChip';
+import { Breadcrumbs } from '@/components/ui';
+import { FINANCIAL_TOPICS, TRENDING_TOPICS, type FinancialTopic } from '@/services/topicsDB';
 
 export default function CommunityPage() {
   const { posts, upvotePost, downvotePost } = useCommunityStore();
   const [sortBy, setSortBy] = useState<'hot' | 'new' | 'top'>('hot');
+  const [activeTopic, setActiveTopic] = useState<FinancialTopic | null>(null);
 
   const getSortedPosts = useCommunityStore((s: any) => s.getSortedPosts);
-  const sortedPosts = getSortedPosts ? getSortedPosts(sortBy) : posts;
+  const allPosts = getSortedPosts ? getSortedPosts(sortBy) : posts;
+
+  // Filter posts by active topic community tags
+  const sortedPosts = useMemo(() => {
+    if (!activeTopic) return allPosts;
+    return allPosts?.filter((post: any) =>
+      post.tags?.some((tag: string) =>
+        activeTopic.communityTags.some(
+          (ct) => ct.toLowerCase() === tag.toLowerCase()
+        )
+      )
+    );
+  }, [allPosts, activeTopic]);
+
+  function handleTopicClick(topic: FinancialTopic) {
+    setActiveTopic((prev) => (prev?.id === topic.id ? null : topic));
+  }
 
   const container = {
     hidden: { opacity: 0 },
@@ -42,6 +64,7 @@ export default function CommunityPage() {
   return (
     <PageLayout>
         <Container >
+          <Breadcrumbs items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Community' }]} className="pl-4 sm:pl-6 lg:pl-8 max-w-7xl mx-auto" />
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 pb-6 lg:pb-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
             <div className="lg:col-span-2 space-y-6 min-w-0">
               {/* Header & Tabs */}
@@ -64,6 +87,28 @@ export default function CommunityPage() {
                   <span className="font-medium">Create Post</span>
                 </button>
               </div>
+
+              {/* Active topic filter pill */}
+              {activeTopic && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex items-center gap-2 p-3 rounded-xl bg-blue-50 border border-blue-200"
+                >
+                  <span className="text-sm font-semibold text-blue-800">
+                    {activeTopic.emoji} Filtered by: {activeTopic.label}
+                  </span>
+                  <span className="text-xs text-blue-600 font-medium">
+                    ({sortedPosts?.length ?? 0} posts)
+                  </span>
+                  <button
+                    onClick={() => setActiveTopic(null)}
+                    className="ml-auto text-blue-500 hover:text-blue-700 transition-colors"
+                  >
+                    <IconX size={16} />
+                  </button>
+                </motion.div>
+              )}
 
               {/* Feed */}
               <motion.div 
@@ -143,7 +188,7 @@ export default function CommunityPage() {
                       <IconMessageCircle size={32} />
                     </div>
                     <h3 className="text-lg font-bold text-zinc-900 mb-2">No posts yet</h3>
-                    <p className="text-zinc-500 mb-6 max-w-sm">Be the first to start a discussion. Share your thoughts, questions, or ideas with the community!</p>
+                    <p className="text-zinc-500 mb-6 max-w-sm">Every great conversation starts with a single post. Share your ideas, ask questions, and grow your wealth of knowledge with the tribe!</p>
                     <button className="flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl transition-colors shrink-0 font-medium">
                       <IconPlus size={20} />
                       <span>Start a Discussion</span>
@@ -180,17 +225,77 @@ export default function CommunityPage() {
                 </div>
               </div>
 
-              {/* Trending Tags */}
+              {/* Financial Topic Discovery */}
+              <div className="bg-white rounded-2xl p-6 border border-zinc-200 shadow-sm">
+                <h3 className="text-lg font-bold text-zinc-900 mb-1 flex items-center gap-2">
+                  <IconSparkles className="text-purple-500" size={20} />
+                  Explore Topics
+                </h3>
+                <p className="text-xs text-zinc-500 mb-4">Filter discussions by financial topic</p>
+
+                {/* Trending topics first */}
+                <div className="mb-4">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 mb-2">🔥 Trending</p>
+                  <div className="flex flex-wrap gap-2">
+                    {TRENDING_TOPICS.slice(0, 4).map((topic, idx) => (
+                      <TopicChip
+                        key={topic.id}
+                        topic={topic}
+                        selected={activeTopic?.id === topic.id}
+                        size="sm"
+                        onClick={handleTopicClick}
+                        index={idx}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {/* All topics */}
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 mb-2">All Topics</p>
+                  <div className="flex flex-wrap gap-2">
+                    {FINANCIAL_TOPICS.filter(t => !TRENDING_TOPICS.slice(0, 4).find(tt => tt.id === t.id)).map((topic, idx) => (
+                      <TopicChip
+                        key={topic.id}
+                        topic={topic}
+                        selected={activeTopic?.id === topic.id}
+                        size="sm"
+                        showCount={false}
+                        onClick={handleTopicClick}
+                        index={idx + 4}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {activeTopic && (
+                  <button
+                    onClick={() => setActiveTopic(null)}
+                    className="mt-4 flex items-center gap-1 text-xs font-semibold text-zinc-400 hover:text-zinc-700 transition-colors"
+                  >
+                    <IconX size={12} /> Clear filter
+                  </button>
+                )}
+              </div>
+
+              {/* What people are discussing */}
               <div className="bg-white rounded-2xl p-6 border border-zinc-200 shadow-sm">
                 <h3 className="text-lg font-bold text-zinc-900 mb-4 flex items-center">
                   <IconTrendingUp className="mr-2 text-purple-500" size={24} />
-                  Trending Topics
+                  Most Discussed
                 </h3>
-                <div className="flex flex-wrap gap-2">
-                  {['#technology', '#startup', '#design', '#engineering', '#web3', '#ai', '#career'].map(tag => (
-                    <Link key={tag} href={`/community?tag=${tag.replace('#', '')}`} className="px-3 py-1.5 rounded-lg bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 text-xs font-medium text-zinc-600 transition-colors">
-                      {tag}
-                    </Link>
+                <div className="space-y-3">
+                  {FINANCIAL_TOPICS.sort((a, b) => b.discussionCount - a.discussionCount).slice(0, 5).map((topic, idx) => (
+                    <button
+                      key={topic.id}
+                      onClick={() => handleTopicClick(topic)}
+                      className="w-full flex items-center gap-3 text-left hover:bg-zinc-50 rounded-lg p-1.5 -mx-1.5 transition-colors"
+                    >
+                      <span className="text-xs font-black text-zinc-300 w-4 text-center">{idx + 1}</span>
+                      <span className="text-base">{topic.emoji}</span>
+                      <span className="text-sm font-medium text-zinc-700 flex-1 truncate">{topic.label}</span>
+                      <span className="text-xs text-zinc-400 font-medium shrink-0">{topic.discussionCount}</span>
+                    </button>
                   ))}
                 </div>
               </div>

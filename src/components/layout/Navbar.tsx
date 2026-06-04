@@ -132,13 +132,20 @@ export function Navbar() {
                 key={link.label}
                 href={link.href}
                 className={cn(
-                  "rounded-[var(--radius-md)] px-3 py-2 text-sm transition-colors",
+                  "relative rounded-full px-4 py-2 text-sm transition-colors",
                   isActive 
                     ? "text-brand-primary font-semibold bg-brand-primary/10" 
                     : "font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900"
                 )}
               >
-                {link.label}
+                {isActive && (
+                  <motion.div
+                    layoutId="desktop-nav-indicator"
+                    className="absolute bottom-1 left-4 right-4 h-0.5 rounded-full bg-brand-primary"
+                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                  />
+                )}
+                <span className="relative z-10">{link.label}</span>
               </Link>
             );
           })}

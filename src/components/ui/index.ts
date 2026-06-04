@@ -4,3 +4,5 @@ export { ProgressBar, type ProgressBarProps } from './ProgressBar';
 export { Badge, type BadgeProps } from './Badge';
 export { Input, type InputProps } from './Input';
 export { CommandPalette } from './CommandPalette';
+export * from './Skeleton';
+export { Breadcrumbs, type BreadcrumbsProps } from './Breadcrumbs';

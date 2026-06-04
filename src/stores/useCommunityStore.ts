@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { CommunityPost, CommunityComment } from '@/types';
+import { CommunityPostSchema } from '@/lib/security/validation';
+import { sanitizeObject } from '@/lib/security/xss';
 
 /* ── Mock Data ── */
 
@@ -153,38 +155,58 @@ export const useCommunityStore = create<CommunityState>()(
           ),
         })),
 
-      addComment: (postId, comment) =>
-        set((state) => ({
-          posts: state.posts.map((p) =>
-            p.id === postId
-              ? {
-                  ...p,
-                  commentCount: p.commentCount + 1,
-                  comments: [
-                    ...p.comments,
-                    { ...comment, id: `c_${Date.now()}`, createdAt: new Date().toISOString() },
-                  ],
-                }
-              : p
-          ),
-        })),
+      addComment: (postId, comment) => {
+        try {
+          const sanitizedComment = sanitizeObject(comment);
+          set((state) => ({
+            posts: state.posts.map((p) =>
+              p.id === postId
+                ? {
+                    ...p,
+                    commentCount: p.commentCount + 1,
+                    comments: [
+                      ...p.comments,
+                      { ...sanitizedComment, id: `c_${Date.now()}`, createdAt: new Date().toISOString() },
+                    ],
+                  }
+                : p
+            ),
+          }));
+        } catch (error) {
+          console.error('Security: Validation failed for addComment:', error);
+        }
+      },
 
-      addPost: (post) =>
-        set((state) => ({
-          posts: [
-            {
-              ...post,
-              id: `post_${Date.now()}`,
-              createdAt: new Date().toISOString(),
-              upvotes: 0,
-              downvotes: 0,
-              commentCount: 0,
-              comments: [],
-              bookmarked: false,
-            },
-            ...state.posts,
-          ],
-        })),
+      addPost: (post) => {
+        try {
+          const sanitizedPost = sanitizeObject(post);
+          // Validate the content and tag which are the primary user inputs
+          const validatedPost = CommunityPostSchema.parse({
+            content: sanitizedPost.content,
+            tag: sanitizedPost.tag,
+          });
+
+          set((state) => ({
+            posts: [
+              {
+                ...sanitizedPost,
+                content: validatedPost.content,
+                tag: validatedPost.tag,
+                id: `post_${Date.now()}`,
+                createdAt: new Date().toISOString(),
+                upvotes: 0,
+                downvotes: 0,
+                commentCount: 0,
+                comments: [],
+                bookmarked: false,
+              },
+              ...state.posts,
+            ],
+          }));
+        } catch (error) {
+          console.error('Security: Validation failed for addPost:', error);
+        }
+      },
 
       toggleBookmark: (postId) =>
         set((state) => ({

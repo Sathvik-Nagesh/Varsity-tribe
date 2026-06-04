@@ -8,8 +8,7 @@ import { cn } from '@/lib/cn';
 
 const cardVariants = {
   default: 'bg-white border border-slate-200 shadow-sm',
-  elevated: 'bg-white border border-slate-200 shadow-[0_8px_30px_-4px_rgba(0,0,0,0.1)]',
-  glass: 'bg-white border border-slate-200 shadow-md',
+  elevated: 'bg-white border border-slate-200 shadow-md',
 } as const;
 
 /* ── Props ── */
@@ -27,19 +26,12 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
       <motion.div
         ref={ref}
         initial="initial"
-        whileHover={hoverable ? 'hover' : undefined}
-        variants={
-              hoverable
-                ? {
-                    initial: { y: 0, scale: 1, boxShadow: 'var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)' },
-                    hover: { y: -6, scale: 1.02, boxShadow: '0 20px 40px -10px rgba(0,0,0,0.15)', transition: { duration: 0.3, ease: 'easeOut' } },
-                  }
-            : undefined
-        }
+        whileHover={hoverable ? { y: -2, scale: 1.01 } : undefined}
+        transition={{ duration: 0.2, ease: 'easeOut' }}
         className={cn(
-          'rounded-[20px] text-brand-text-primary overflow-hidden',
+          'rounded-2xl text-brand-text-primary overflow-hidden transition-shadow',
           cardVariants[variant],
-          hoverable && 'cursor-pointer transition-colors',
+          hoverable && 'cursor-pointer hover:shadow-lg',
           className
         )}
         {...rest}

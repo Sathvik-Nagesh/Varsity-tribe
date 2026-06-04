@@ -5,6 +5,7 @@ import { PageLayout } from "@/components/layout/PageLayout";
 import { Container } from "@/components/layout/Container";
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { Breadcrumbs } from '@/components/ui';
 import { IconTarget, IconPlus } from '@tabler/icons-react';
 import Link from 'next/link';
 
@@ -14,12 +15,7 @@ export default function GoalsPage() {
   return (
     <PageLayout>
       <Container>
-        {/* Breadcrumb inserted based on requirements */}
-        <div className="mb-6">
-          <Link href="/dashboard" className="text-small font-medium text-brand-primary hover:underline">
-            &larr; Back to Dashboard
-          </Link>
-        </div>
+        <Breadcrumbs items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Your Goals' }]} />
 
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-h1">Your Goals</h1>
@@ -37,7 +33,7 @@ export default function GoalsPage() {
             </div>
             <h2 className="text-h2 mb-2">No goals yet</h2>
             <p className="text-body text-brand-text-secondary max-w-md mb-8">
-              Create your first goal and start building wealth. Track your progress, manage SIPs, and achieve financial freedom.
+              Your future wealth journey starts with one goal. Set your first target, track your progress, and achieve financial freedom.
             </p>
             <Button variant="primary" size="md" icon={<IconPlus size={20} />}>
               Create First Goal

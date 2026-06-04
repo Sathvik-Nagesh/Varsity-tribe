@@ -15,6 +15,8 @@ import type {
   RiskProfile,
   UserLevel,
 } from '@/types';
+import { ProfileUpdateSchema, XPAwardSchema } from '@/lib/security/validation';
+import { sanitizeObject } from '@/lib/security/xss';
 
 // ─── Helper Functions ────────────────────────────────────────────────
 
@@ -215,22 +217,36 @@ export const useUserStore = create<UserState>()(
 
       // ── Actions ──────────────────────────────────────────────
 
-      setOnboardingField: (field, value) =>
-        set((state) => ({
-          onboardingAnswers: { ...state.onboardingAnswers, [field]: value },
-        })),
-
-      completeOnboarding: (answers) => {
-        set({
-          onboardingAnswers: answers,
-          onboardingCompleted: true,
-        });
+      setOnboardingField: (field, value) => {
+        try {
+          const sanitizedValue = sanitizeObject(value);
+          set((state) => ({
+            onboardingAnswers: { ...state.onboardingAnswers, [field]: sanitizedValue },
+          }));
+        } catch (error) {
+          console.error('Security: Validation failed for setOnboardingField:', error);
+        }
       },
 
-      addXP: (amount) =>
-        set((state) => {
-          const currentLevel = computeLevel(state.xp);
-          const newXP = state.xp + amount;
+      completeOnboarding: (answers) => {
+        try {
+          const sanitized = sanitizeObject(answers);
+          const validated = ProfileUpdateSchema.parse(sanitized);
+          set({
+            onboardingAnswers: validated,
+            onboardingCompleted: true,
+          });
+        } catch (error) {
+          console.error('Security: Validation failed for completeOnboarding:', error);
+        }
+      },
+
+      addXP: (amount) => {
+        try {
+          const validatedAmount = XPAwardSchema.parse(amount);
+          set((state) => {
+            const currentLevel = computeLevel(state.xp);
+            const newXP = state.xp + validatedAmount;
           const newLevel = computeLevel(newXP);
           
           if (newLevel !== currentLevel) {
@@ -246,9 +262,22 @@ export const useUserStore = create<UserState>()(
           }
 
           return { xp: newXP };
-        }),
+        });
+        } catch (error) {
+          console.error('Security: Validation failed for addXP:', error);
+        }
+      },
       
-      recalculateHealthScore: () => set((state) => ({ ...state })),
+      recalculateHealthScore: () => set((state) => {
+        const base = 300;
+        const streakScore = Math.min(state.streak * 10, 200);
+        const progressScore = Math.min(state.xp / 10, 300);
+        const goalsScore = Math.min(state.onboardingAnswers.currentGoals.length * 50, 200);
+        
+        const newScore = Math.floor(base + streakScore + progressScore + goalsScore);
+        
+        return { financialHealthScore: Math.min(newScore, 1000) };
+      }),
 
       setCurrency: (currency) => set({ currency }),
     }),

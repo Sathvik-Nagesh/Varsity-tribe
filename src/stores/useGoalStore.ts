@@ -7,6 +7,8 @@ import { toast } from 'sonner';
 import type { FinancialGoal, GoalConflict, GoalMilestone } from '@/types';
 import { useUserStore } from './useUserStore';
 import { formatCurrency } from '@/lib/formatCurrency';
+import { GoalSchema } from '@/lib/security/validation';
+import { sanitizeObject } from '@/lib/security/xss';
 
 // ─── Helpers ─────────────────────────────────────────────────────────
 
@@ -100,14 +102,21 @@ export const useGoalStore = create<GoalState>()(
       goals: mockGoals,
 
       addGoal: (goalInput) => {
-        const newGoal: FinancialGoal = {
-          ...goalInput,
-          id: generateId(),
-          milestones: createDefaultMilestones(),
-          createdAt: new Date().toISOString().split('T')[0],
-        };
+        try {
+          const sanitizedInput = sanitizeObject(goalInput);
+          const validatedInput = GoalSchema.parse(sanitizedInput);
 
-        set((state) => ({ goals: [...state.goals, newGoal] }));
+          const newGoal: FinancialGoal = {
+            ...validatedInput,
+            id: generateId(),
+            milestones: createDefaultMilestones(),
+            createdAt: new Date().toISOString().split('T')[0],
+          };
+
+          set((state) => ({ goals: [...state.goals, newGoal] }));
+        } catch (error) {
+          console.error('Security: Validation failed for addGoal:', error);
+        }
       },
 
       updateProgress: (goalId, amount) => {

@@ -21,7 +21,8 @@ function ErrorFallback() {
 }
 
 import dynamic from 'next/dynamic';
-import CompoundInterestChart from './CompoundInterestChart';
+import { ChartSkeleton } from '@/components/ui/Skeleton';
+const CompoundInterestChart = dynamic(() => import('./CompoundInterestChart'), { ssr: false, loading: () => <ChartSkeleton /> });
 import CompoundInterestTable from './CompoundInterestTable';
 const CompoundInterest3D = dynamic(() => import('./CompoundInterest3D'), { ssr: false });
 

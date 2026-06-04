@@ -1,12 +1,11 @@
-'use client';
+import re
 
-import React, { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-/**
- * GoalCelebration
- * Triggers a burst of confetti when the `trigger` prop changes to true.
- * Ideal for when a user completes a goal or milestone.
- */
+with open('src/components/ui/Animations.tsx', 'r', encoding='utf-8') as f:
+    code = f.read()
+
+code = code.replace("import confetti from 'canvas-confetti';", "")
+
+replacement = """
 export function GoalCelebration({ 
   trigger, 
   duration = 3000 
@@ -66,48 +65,9 @@ export function GoalCelebration({
     </div>
   );
 }
+"""
 
-/**
- * FloatingXP
- * A floating +XP animation that spawns in the center of the screen 
- * (or relative to a container if properly styled) and floats up before disappearing.
- */
-export function FloatingXP({ 
-  amount, 
-  trigger, 
-  onComplete 
-}: { 
-  amount: number; 
-  trigger: boolean; 
-  onComplete?: () => void;
-}) {
-  const [show, setShow] = useState(false);
+code = re.sub(r'export function GoalCelebration.*?return null; // This component doesn\'t render any DOM elements\n\}', replacement, code, flags=re.DOTALL)
 
-  useEffect(() => {
-    if (trigger) {
-      setShow(true);
-      const timer = setTimeout(() => {
-        setShow(false);
-        if (onComplete) onComplete();
-      }, 1500);
-      return () => clearTimeout(timer);
-    }
-  }, [trigger, onComplete]);
-
-  return (
-    <AnimatePresence>
-      {show && (
-        <motion.div
-          initial={{ opacity: 0, y: 0, scale: 0.8 }}
-          animate={{ opacity: 1, y: -50, scale: 1.2 }}
-          exit={{ opacity: 0, y: -80, scale: 1 }}
-          transition={{ duration: 1.5, ease: "easeOut" }}
-          className="pointer-events-none fixed z-[100] flex items-center justify-center font-bold text-brand-warning drop-shadow-md text-2xl"
-          style={{ top: '50%', left: '50%', x: '-50%', y: '-50%' }}
-        >
-          +{amount} XP
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-}
+with open('src/components/ui/Animations.tsx', 'w', encoding='utf-8') as f:
+    f.write(code)

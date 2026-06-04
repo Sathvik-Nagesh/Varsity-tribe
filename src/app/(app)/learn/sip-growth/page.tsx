@@ -14,8 +14,9 @@ const XAxis = dynamic(() => import('recharts').then((mod) => mod.XAxis), { ssr: 
 const YAxis = dynamic(() => import('recharts').then((mod) => mod.YAxis), { ssr: false });
 const CartesianGrid = dynamic(() => import('recharts').then((mod) => mod.CartesianGrid), { ssr: false });
 const Tooltip = dynamic(() => import('recharts').then((mod) => mod.Tooltip), { ssr: false });
+import { ChartSkeleton } from '@/components/ui/Skeleton';
 const Legend = dynamic(() => import('recharts').then((mod) => mod.Legend), { ssr: false });
-const ResponsiveContainer = dynamic(() => import('recharts').then((mod) => mod.ResponsiveContainer), { ssr: false });
+const ResponsiveContainer = dynamic(() => import('recharts').then((mod) => mod.ResponsiveContainer), { ssr: false, loading: () => <div className="w-full h-full"><ChartSkeleton /></div> });
 import { PageLayout } from "@/components/layout/PageLayout";
 import { useUserStore } from '@/stores/useUserStore';
 import { formatCurrency } from '@/lib/formatCurrency';

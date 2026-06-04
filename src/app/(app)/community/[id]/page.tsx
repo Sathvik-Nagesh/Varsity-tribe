@@ -16,6 +16,7 @@ import {
 import Link from 'next/link';
 import { Container } from '@/components/layout/Container';
 import { PageLayout } from "@/components/layout/PageLayout";
+import { Breadcrumbs } from '@/components/ui';
 
 export default function PostDetailPage() {
   const params = useParams();
@@ -31,9 +32,7 @@ export default function PostDetailPage() {
     return (
       <Container >
         <div className="py-12 px-4 max-w-4xl mx-auto">
-          <Link href="/community" className="inline-flex items-center text-zinc-500 hover:text-zinc-900 mb-8 transition-colors">
-            &larr; Back to Community
-          </Link>
+          <Breadcrumbs items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Community', href: '/community' }, { label: 'Post' }]} className="mb-8" />
           <div className="glass-strong rounded-2xl p-12 text-center text-zinc-500 border border-white/5">
             Post not found or loading...
           </div>
@@ -46,9 +45,7 @@ export default function PostDetailPage() {
     <PageLayout>
         <Container >
           <div className="py-6 sm:py-8 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto min-w-0">
-            <Link href="/community" className="inline-flex items-center text-sm font-medium text-zinc-500 hover:text-zinc-900 mb-6 transition-colors">
-              &larr; Back to Community
-            </Link>
+            <Breadcrumbs items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Community', href: '/community' }, { label: 'Post' }]} className="mb-6" />
 
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
